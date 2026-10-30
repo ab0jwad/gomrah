@@ -94,16 +94,18 @@ nav button.on{color:#fff;border-color:var(--gold);font-weight:700}
         <button class="btn sec" id="gNo">أعتذر</button>
       </div>
       <div class="msg err" id="gErr" hidden></div>
-      <p class="note">إذا سبق أن أكّدتِ حضوركِ، اكتبي رقم جوالكِ واضغطي «سأحضر» لتظهر بطاقتكِ مرة أخرى.</p>
+      <p class="note">إذا سبق أن أكّدتِ حضوركِ من هذا الجوال، اكتبي رقمكِ واضغطي «سأحضر» لتظهر بطاقتكِ مرة أخرى.</p>
     </div>
 
     <!-- card -->
     <div id="gCard" hidden>
       <div class="msg ok center" id="gWelcome"></div>
       <img class="cardimg" id="gCardImg" alt="بطاقة الدخول">
-      <p class="note center">اعرضي هذه البطاقة عند الباب. البطاقة شخصية وتُستخدم مرة واحدة.</p>
+      <p class="msg ok center" id="gComp" hidden></p>
+      <p class="note center">اعرضي هذه البطاقة عند الباب. البطاقة شخصية وتُستخدم مرة واحدة فقط. احفظيها في الصور لتفتحيها بدون إنترنت.</p>
       <div class="stack">
-        <a class="btn" id="gSave" download="بطاقة_دخول_غمرة_دانتي.png">💾 حفظ البطاقة في الصور</a>
+        <button class="btn" id="gSave">💾 حفظ البطاقة في الصور</button>
+        <p class="note center" id="gSaveHelp" hidden>اضغطي مطوّلاً على البطاقة في الأعلى، ثم اختاري «حفظ في الصور» أو «تنزيل الصورة».</p>
         <a class="btn sec" href="https://maps.app.goo.gl/qinSGP4HHEeGfou36" target="_blank" rel="noopener">📍 موقع القاعة</a>
         <button class="btn ghost" id="gCancel">لن أتمكن من الحضور — إلغاء بطاقتي</button>
         <button class="btn sec" id="gOther" style="font-size:15px">بطاقة لشخص آخر من هذا الجوال</button>
@@ -139,9 +141,9 @@ nav button.on{color:#fff;border-color:var(--gold);font-weight:700}
 
     <section id="v-door" hidden>
       <div class="counter">
-        <div><b id="cIn">0</b><span>دخلن</span></div>
-        <div><b id="cWait">0</b><span>لم يصلن</span></div>
-        <div><b id="cTaken">0</b><span>مؤكدات</span></div>
+        <div><b id="cIn">0</b><span>دخلوا (أشخاص)</span></div>
+        <div><b id="cWait">0</b><span>لم يصلوا</span></div>
+        <div><b id="cTaken">0</b><span>مؤكدون</span></div>
       </div>
       <div class="cam" id="cam" hidden><video id="vid" playsinline muted></video><div class="frame"></div></div>
       <div class="stack">
@@ -157,6 +159,7 @@ nav button.on{color:#fff;border-color:var(--gold);font-weight:700}
       <input id="q" placeholder="ابحث بالاسم أو الجوال أو رقم البطاقة">
       <div class="filters" id="filters">
         <button data-f="taken" class="on">مؤكدات</button>
+        <button data-f="comp">مع مرافقين</button>
         <button data-f="in">دخلن</button>
         <button data-f="wait">لم يصلن</button>
         <button data-f="norem">بدون تذكير</button>
@@ -12607,11 +12610,13 @@ function normPhone(p){p=String(p||'').replace(/\D/g,'');if(p.startsWith('00'))p=
 
 /* ================= GUEST ================= */
 let gPhone=ls.get('g_phone')||'', gName=ls.get('g_name')||'';
+let gDev=ls.get('g_dev');if(!gDev){const a=new Uint8Array(16);crypto.getRandomValues(a);gDev='d'+Array.from(a,b=>b.toString(16).padStart(2,'0')).join('');ls.set('g_dev',gDev)}
+const OTHER_DEV='هذه البطاقة مسجّلة على جوال آخر. إذا غيّرتِ جوالكِ، تواصلي مع صاحبة الدعوة.';
 async function gStatus(){try{const s=await rpc('guest_status');$('gTaken').textContent=s.taken;$('gCap').textContent=s.capacity;$('gBar').style.width=Math.min(100,s.taken/s.capacity*100)+'%';const left=s.capacity-s.taken;$('gLeft').textContent=left>0?('تبقّى '+left+' مقعداً'):'اكتمل العدد';return s}catch(e){$('gLeft').textContent='تعذّر الاتصال، تأكدي من الإنترنت';return null}}
 function gShow(which){['gForm','gCard','gDone'].forEach(id=>$(id).hidden=id!==which)}
 function gErr(t){const e=$('gErr');e.textContent=t;e.hidden=!t}
 const heroReady=new Promise(res=>{const i=$('heroImg');if(i.complete&&i.naturalWidth)res(i);else{i.onload=()=>res(i);i.onerror=()=>res(null)}});
-async function renderCard(no,code,name){
+async function renderCard(no,code,name,comp){
   const hero=await heroReady;const W=956,H=1600;const c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
   if(hero)x.drawImage(hero,0,0,W,H);else{x.fillStyle='#6f7f4e';x.fillRect(0,0,W,H)}
   const x0=572,y0=738,x1=942,y1=1238,cx=(x0+x1)/2;
@@ -12624,12 +12629,14 @@ async function renderCard(no,code,name){
   x.fillStyle='#fff';x.fillRect(cx-qs/2,y0+66,qs,qs);x.fillStyle='#280004';
   for(let r=0;r<n;r++)for(let k=0;k<n;k++)if(q.isDark(r,k))x.fillRect(Math.floor(cx-qs/2+(k+m)*cell),Math.floor(y0+66+(r+m)*cell),Math.ceil(cell),Math.ceil(cell));
   x.fillStyle='#58060a';x.font='700 30px -apple-system,Tahoma,sans-serif';x.fillText('رقم البطاقة: '+pad(no),cx,y0+410);
-  x.font='600 24px -apple-system,Tahoma,sans-serif';let nm='المكرمة: '+name;while(x.measureText(nm).width>340&&nm.length>8)nm=nm.slice(0,-1);x.fillText(nm,cx,y0+444);
-  x.fillStyle='#96704a';x.font='20px -apple-system,Tahoma,sans-serif';x.fillText('شخصية · تُستخدم مرة واحدة',cx,y0+474);
+  x.font='600 24px -apple-system,Tahoma,sans-serif';let nm='المكرمة: '+name;while(x.measureText(nm).width>340&&nm.length>8)nm=nm.slice(0,-1);x.fillText(nm,cx,y0+440);
+  if(comp>0){x.fillStyle='#1f6b3a';x.font='700 22px -apple-system,Tahoma,sans-serif';x.fillText(comp===1?'+ مرافقة واحدة':('+ '+comp+' مرافقات'),cx,y0+469)}
+  else{x.fillStyle='#96704a';x.font='20px -apple-system,Tahoma,sans-serif';x.fillText('شخصية · تُستخدم مرة واحدة',cx,y0+469)}
   return c.toDataURL('image/png');
 }
 async function gShowCard(r){
-  const url=await renderCard(r.no,r.code,r.name);$('gCardImg').src=url;$('gSave').href=url;
+  const url=await renderCard(r.no,r.code,r.name,r.companions||0);$('gCardImg').src=url;cardURL=url;
+  $('gComp').textContent=r.companions>0?('بطاقتكِ تشمل '+(r.companions===1?'مرافقة واحدة':r.companions+' مرافقات')+' — عدد الأشخاص '+(1+r.companions)):'';$('gComp').hidden=!(r.companions>0);
   $('gWelcome').textContent=(r.existing?'أهلاً '+r.name+'، هذه بطاقتكِ':'تم تأكيد حضوركِ، حياكِ الله '+r.name+' 🌸');
   gShow('gCard');window.scrollTo({top:$('gCard').offsetTop-10,behavior:'smooth'});
 }
@@ -12637,24 +12644,31 @@ function gDone(t,s){$('gDoneT').textContent=t;$('gDoneS').textContent=s||'';gSho
 async function guestInit(){
   $('guest').hidden=false;$('gName').value=gName;$('gPhone').value=gPhone;
   await gStatus();setInterval(gStatus,15000);
-  if(gPhone){try{const r=await rpc('guest_my_card',{p_phone:gPhone});if(r.ok){r.existing=true;await gShowCard(r)}}catch(e){}}
+  if(gPhone){try{const r=await rpc('guest_my_card',{p_phone:gPhone,p_device:gDev});if(r.ok){r.existing=true;await gShowCard(r)}}catch(e){}}
 }
 function gRead(needName){const nm=$('gName').value.trim(),ph=$('gPhone').value.trim();
   if(needName&&nm.length<2){gErr('اكتبي الاسم');return null}
   if(normPhone(ph).length<11){gErr('اكتبي رقم الجوال كاملاً، مثل 05xxxxxxxx');return null}
   gErr('');return{nm,ph}}
 $('gYes').onclick=async e=>{const v=gRead(true);if(!v)return;const b=e.target;b.disabled=true;
-  try{const r=await rpc('guest_claim',{p_name:v.nm,p_phone:v.ph});
+  try{const r=await rpc('guest_claim',{p_name:v.nm,p_phone:v.ph,p_device:gDev});
     if(r.ok){gPhone=v.ph;gName=v.nm;ls.set('g_phone',v.ph);ls.set('g_name',v.nm);await gShowCard(r);gStatus()}
+    else if(r.err==='other_device')gErr(OTHER_DEV);
     else if(r.err==='full')gDone('نعتذر، اكتمل العدد','شكراً لكِ، ونتمنى رؤيتكِ في مناسبة قادمة.');
     else gErr('تأكدي من الاسم ورقم الجوال');
   }catch(err){gErr('تعذّر الاتصال، حاولي مرة أخرى')}b.disabled=false};
 $('gNo').onclick=async e=>{const v=gRead(false);if(!v)return;const b=e.target;if(!twoTap(b,'اضغطي مرة أخرى للتأكيد'))return;b.disabled=true;
-  try{await rpc('guest_decline',{p_name:v.nm,p_phone:v.ph});ls.del('g_phone');gDone('شكراً لإبلاغنا','نتمنى لكِ كل الخير.');gStatus()}catch(err){gErr('تعذّر الاتصال، حاولي مرة أخرى')}b.disabled=false};
+  try{const d=await rpc('guest_decline',{p_name:v.nm,p_phone:v.ph,p_device:gDev});if(d.err==='other_device'){gErr(OTHER_DEV);b.disabled=false;return}ls.del('g_phone');gDone('شكراً لإبلاغنا','نتمنى لكِ كل الخير.');gStatus()}catch(err){gErr('تعذّر الاتصال، حاولي مرة أخرى')}b.disabled=false};
 $('gCancel').onclick=async e=>{const b=e.target;if(!twoTap(b,'متأكدة؟ اضغطي مرة أخرى لإلغاء البطاقة'))return;b.disabled=true;
-  try{await rpc('guest_decline',{p_name:gName,p_phone:gPhone});ls.del('g_phone');gPhone='';$('gPhone').value='';gDone('أُلغيت بطاقتكِ','شكراً لإبلاغنا، وأُتيح مقعدكِ لضيفة أخرى.');gStatus()}catch(err){toast('تعذّر الاتصال، حاولي مرة أخرى')}b.disabled=false};
+  try{const d=await rpc('guest_decline',{p_name:gName,p_phone:gPhone,p_device:gDev});if(d.err==='other_device'){toast(OTHER_DEV);b.disabled=false;return}ls.del('g_phone');gPhone='';$('gPhone').value='';gDone('أُلغيت بطاقتكِ','شكراً لإبلاغنا، وأُتيح مقعدكِ لضيفة أخرى.');gStatus()}catch(err){toast('تعذّر الاتصال، حاولي مرة أخرى')}b.disabled=false};
 $('gOther').onclick=()=>{ls.del('g_phone');ls.del('g_name');gPhone='';gName='';$('gName').value='';$('gPhone').value='';gShow('gForm')};
 $('gBack').onclick=()=>gShow('gForm');
+let cardURL='';
+$('gSave').onclick=async()=>{
+  try{const blob=await (await fetch(cardURL)).blob();const file=new File([blob],'بطاقة_غمرة_دانتي.png',{type:'image/png'});
+    if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file]});return}
+  }catch(e){if(e&&e.name==='AbortError')return}
+  $('gSaveHelp').hidden=false;$('gCardImg').scrollIntoView({behavior:'smooth',block:'center'})};
 
 /* ================= STAFF ================= */
 let PIN=ls.get('s_pin')||'', data=null, view='door';
@@ -12664,28 +12678,33 @@ async function load(){if(!PIN)return;try{data=await rpc('admin_list',{p_pin:PIN}
 function showPin(err){$('pinBox').hidden=false;$('sNav').hidden=true;['door','list','more'].forEach(k=>$('v-'+k).hidden=true);$('pinErr').textContent=err||'';$('pinErr').hidden=!err}
 $('pinBtn').onclick=async()=>{const p=$('pin').value.trim();try{await rpc('admin_action',{p_pin:p,p_action:'ping'});PIN=p;ls.set('s_pin',p);$('pinBox').hidden=true;$('sNav').hidden=false;sView(view);load()}catch(e){showPin(e.message==='locked'?'محاولات كثيرة، انتظري 10 دقائق':'الرقم السري غير صحيح')}};
 $('pin').onkeydown=e=>{if(e.key==='Enter')$('pinBtn').click()};
-function counts(){const c=(data&&data.cards)||[];const taken=c.filter(x=>x.status==='taken');const inn=taken.filter(x=>x.entered_at).length;return{taken:taken.length,inn,wait:taken.length-inn,cap:data?data.capacity:230}}
-function render(){if(!data)return;const k=counts();$('cIn').textContent=k.inn;$('cWait').textContent=k.wait;$('cTaken').textContent=k.taken;$('sHdr').textContent='دخلن '+k.inn+' · مؤكدات '+k.taken+' / '+k.cap;if(view==='list')renderList()}
+function counts(){const c=(data&&data.cards)||[];const taken=c.filter(x=>x.status==='taken');const P=x=>1+(x.companions||0);const tp=taken.reduce((s,x)=>s+P(x),0);const inn=taken.filter(x=>x.entered_at).reduce((s,x)=>s+P(x),0);return{taken:tp,inn,wait:tp-inn,cap:data?data.capacity:230}}
+function render(){if(!data)return;const k=counts();$('cIn').textContent=k.inn;$('cWait').textContent=k.wait;$('cTaken').textContent=k.taken;$('sHdr').textContent='دخل '+k.inn+' · مؤكد '+k.taken+' / '+k.cap+' شخصاً';if(view==='list')renderList()}
 let filt='taken';
 document.querySelectorAll('#filters button').forEach(b=>b.onclick=()=>{filt=b.dataset.f;document.querySelectorAll('#filters button').forEach(x=>x.classList.toggle('on',x===b));renderList()});
 $('q').oninput=()=>renderList();
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const showPh=p=>p&&p.startsWith('966')?'0'+p.slice(3):p;
-function remindText(c){return 'حياكِ الله '+c.name+' 🌸\nنذكّركِ بمناسبة غمرة دانتي يوم السبت 18/06/1448هـ الموافق 28/11/2026م.\nبطاقة دخولكِ رقم '+pad(c.no)+'، وتظهر لكِ من رابط الدعوة بكتابة رقم جوالكِ:\n'+GUEST_URL+'\n📍 موقع القاعة: '+MAPS+'\nوإذا لم تتمكني من الحضور، نرجو الإلغاء من نفس الرابط ليُتاح المقعد لغيركِ.'}
+function remindText(c){return 'حياكِ الله '+c.name+' 🌸\nنذكّركِ بمناسبة غمرة دانتي يوم السبت 18/06/1448هـ الموافق 28/11/2026م.\nبطاقة دخولكِ رقم '+pad(c.no)+(c.companions>0?(' (عدد الأشخاص '+(1+c.companions)+')'):'')+'، وتظهر لكِ من رابط الدعوة:\n'+GUEST_URL+'\n📍 موقع القاعة: '+MAPS+'\nوإذا لم تتمكني من الحضور، نرجو الإلغاء من نفس الرابط ليُتاح المقعد لغيركِ.'}
 function renderList(){
   const q=$('q').value.trim();let items;
   if(filt==='dec'){items=(data.declines||[]).filter(d=>!q||(d.name||'').includes(q)||(d.phone||'').includes(normPhone(q)||q));
     $('rows').innerHTML=items.map(d=>`<div class="item"><div class="h"><span class="nm">${esc(d.name)||'—'}</span><span class="ph">${esc(showPh(d.phone))}</span><span class="chip cx">اعتذرت</span></div></div>`).join('')||'<p class="note">لا يوجد.</p>';return}
   items=data.cards.filter(c=>{
     if(q&&!((c.name||'').includes(q)||(c.phone||'').includes(normPhone(q)||'@')||pad(c.no).includes(q)))return false;
-    switch(filt){case'taken':return c.status==='taken';case'in':return c.status==='taken'&&c.entered_at;case'wait':return c.status==='taken'&&!c.entered_at;case'norem':return c.status==='taken'&&!c.reminded_at&&!c.entered_at;case'cx':return c.status==='cancelled'}return true});
-  $('rows').innerHTML=items.map(c=>{const ch=[];if(c.status==='cancelled')ch.push('<span class="chip cx">ملغاة</span>');if(c.entered_at)ch.push('<span class="chip in">دخلت</span>');if(c.reminded_at&&!c.entered_at)ch.push('<span class="chip rm">ذُكّرت</span>');
-    const a=[];if(c.status==='taken'&&!c.entered_at){a.push(`<a data-rem="${c.no}" target="_blank" rel="noopener" href="https://wa.me/${c.phone}?text=${encodeURIComponent(remindText(c))}">🔔 تذكير</a>`);a.push(`<button data-a="cancel" data-n="${c.no}">إلغاء البطاقة</button>`)}
+    switch(filt){case'taken':return c.status==='taken';case'comp':return c.status==='taken'&&c.companions>0;case'in':return c.status==='taken'&&c.entered_at;case'wait':return c.status==='taken'&&!c.entered_at;case'norem':return c.status==='taken'&&!c.reminded_at&&!c.entered_at;case'cx':return c.status==='cancelled'}return true});
+  $('rows').innerHTML=items.map(c=>{const ch=[];if(c.status==='cancelled')ch.push('<span class="chip cx">ملغاة</span>');if(c.entered_at)ch.push('<span class="chip in">دخلت</span>');if(c.reminded_at&&!c.entered_at)ch.push('<span class="chip rm">ذُكّرت</span>');if(c.companions>0)ch.push('<span class="chip in" style="background:#eef0e4;color:#55623a">+'+c.companions+' مرافق</span>');
+    const a=[];if(c.status==='taken'){a.push(`<button data-a="comp_dec" data-n="${c.no}" data-q="1">− مرافق</button>`);a.push(`<button data-a="comp_inc" data-n="${c.no}" data-q="1">+ مرافق</button>`)}
+    if(c.status==='taken'&&!c.entered_at)a.push(`<button data-a="manual_in" data-n="${c.no}">دخول يدوي</button>`);
+    if(c.status==='taken'&&c.bound)a.push(`<button data-a="release" data-n="${c.no}">فك ربط الجوال</button>`);
+    if(c.status==='taken'&&!c.entered_at){a.push(`<a data-rem="${c.no}" target="_blank" rel="noopener" href="https://wa.me/${c.phone}?text=${encodeURIComponent(remindText(c))}">🔔 تذكير</a>`);a.push(`<button data-a="cancel" data-n="${c.no}">إلغاء البطاقة</button>`)}
     if(c.entered_at)a.push(`<button data-a="undo_entry" data-n="${c.no}">إلغاء الدخول</button>`);
     return `<div class="item"><div class="h"><span class="n">${pad(c.no)}</span><span class="nm">${esc(c.name)}</span><span class="ph">${esc(showPh(c.phone))}</span>${ch.join('')}</div>${a.length?'<div class="acts">'+a.join('')+'</div>':''}</div>`}).join('')||'<p class="note">لا يوجد.</p>'}
 $('rows').onclick=async e=>{const ln=e.target.closest('a[data-rem]');if(ln){rpc('admin_action',{p_pin:PIN,p_action:'reminded',p_no:+ln.dataset.rem}).then(load);return}
-  const b=e.target.closest('button[data-a]');if(!b)return;if(!twoTap(b,'اضغطي مرة أخرى للتأكيد'))return;
-  try{await rpc('admin_action',{p_pin:PIN,p_action:b.dataset.a,p_no:+b.dataset.n});toast('تم');load()}catch(err){toast('تعذّر الاتصال')}};
+  const b=e.target.closest('button[data-a]');if(!b)return;if(!b.dataset.q&&!twoTap(b,'اضغطي مرة أخرى للتأكيد'))return;
+  try{if(b.dataset.a==='manual_in'){await checkin(null,+b.dataset.n);return}
+    const r=await rpc('admin_action',{p_pin:PIN,p_action:b.dataset.a,p_no:+b.dataset.n});
+    toast(r&&r.err==='full'?'لا يمكن: العدد مكتمل':'تم');load()}catch(err){toast('تعذّر الاتصال')}};
 $('guestLink').textContent=GUEST_URL;
 $('copyLink').onclick=async()=>{try{await navigator.clipboard.writeText(GUEST_URL);toast('نُسخ الرابط')}catch(e){toast('انسخي الرابط من الأعلى')}};
 $('aBtn').onclick=async()=>{const nm=$('aName').value.trim(),ph=$('aPhone').value.trim();if(nm.length<2||normPhone(ph).length<11){toast('اكتبي الاسم والجوال');return}
@@ -12703,7 +12722,8 @@ function hide(){$('res').hidden=true;showing=false}
 $('res').onclick=hide;
 async function checkin(code,no){
   try{const r=await rpc('staff_checkin',{p_pin:PIN,p_code:code||null,p_no:no||null});
-    if(r.r==='ok')show(true,'تفضلي',r.name,r.no);
+    const pp=n=>n>0?(' — عدد الأشخاص '+(1+n)):'';
+    if(r.r==='ok')show(true,r.companions>0?('تفضلوا ('+(1+r.companions)+')'):'تفضلي',r.name+pp(r.companions),r.no);
     else if(r.r==='used')show(false,'دخلت سابقاً',r.name+' — الساعة '+new Date(r.at).toLocaleTimeString('ar-SA',{hour:'2-digit',minute:'2-digit'}),r.no);
     else if(r.r==='cancelled')show(false,'بطاقة ملغاة',r.name+' — ألغت حضورها',r.no);
     else show(false,'بطاقة غير صحيحة','الباركود ليس من بطاقات المناسبة');

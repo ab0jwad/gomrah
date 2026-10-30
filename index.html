@@ -23,7 +23,7 @@ section{display:none}section.on{display:block}
 .btn.sm{display:inline-block;width:auto;padding:8px 12px;font-size:14px;border-radius:10px}
 .cam{position:relative;border-radius:18px;overflow:hidden;background:#000;aspect-ratio:1/1;margin-bottom:14px;display:none}
 .cam video{width:100%;height:100%;object-fit:cover}
-.cam .frame{position:absolute;inset:18%;border:3px solid rgba(255,255,255,.85);border-radius:16px}
+.cam .frame{position:absolute;inset:22.5%;border:3px solid rgba(255,255,255,.85);border-radius:16px}
 .manual{display:flex;gap:8px;margin-top:14px}
 .manual input{flex:1;min-width:0;font:inherit;font-size:20px;padding:12px;border-radius:12px;border:2px solid var(--line);text-align:center;background:#fff}
 .manual .btn{width:auto;padding:12px 18px}
@@ -10287,9 +10287,13 @@ let stream=null,raf=null,cv=document.createElement('canvas'),cx2=cv.getContext('
 async function startCam(){
   $('camErr').style.display='none';
   if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){camErr('الفحص المباشر غير متاح هنا. استخدمي زر «صوّري الباركود» أو اكتبي رقم البطاقة.');return}
-  try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1280},height:{ideal:1280}},audio:false})}
+  try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1920},height:{ideal:1080}},audio:false})}
   catch(e){camErr('الفحص المباشر غير متاح هنا. استخدمي زر «صوّري الباركود» أو اكتبي رقم البطاقة.');return}
   const v=$('vid');v.srcObject=stream;await v.play().catch(()=>{});
+  try{const tr=stream.getVideoTracks()[0];const cap=tr.getCapabilities?tr.getCapabilities():{};const adv={};
+    if(cap.focusMode&&cap.focusMode.includes('continuous'))adv.focusMode='continuous';
+    if(cap.zoom&&cap.zoom.max>=1.5)adv.zoom=Math.min(2,cap.zoom.max);
+    if(Object.keys(adv).length)await tr.applyConstraints({advanced:[adv]})}catch(e){}
   $('cam').style.display='block';$('camBtn').textContent='⏹ إيقاف الكاميرا';
   try{if('BarcodeDetector' in window){const f=await BarcodeDetector.getSupportedFormats();if(f.includes('qr_code'))det=new BarcodeDetector({formats:['qr_code']})}}catch(e){det=null}
   loop();
@@ -10302,7 +10306,7 @@ $('photo').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)
     for(const mx of [1000,1600,700]){const s=Math.min(1,mx/Math.max(bmp.width,bmp.height));cv.width=bmp.width*s|0;cv.height=bmp.height*s|0;cx2.drawImage(bmp,0,0,cv.width,cv.height);const d=cx2.getImageData(0,0,cv.width,cv.height);const r=jsQR(d.data,d.width,d.height,{inversionAttempts:'attemptBoth'});if(r){found=r.data;break}}
     if(found)onCode(found);else show(false,'لم يُقرأ الباركود','قرّبي الكاميرا من الباركود وصوّري مرة أخرى، أو اكتبي رقم البطاقة');
   }catch(err){show(false,'تعذر قراءة الصورة','صوّري مرة أخرى أو اكتبي رقم البطاقة')}};
-let busy=false;
+let busy=false,pass=0;
 async function loop(){
   raf=requestAnimationFrame(loop);
   const v=$('vid');if(busy||showing||!stream||v.readyState<2)return;
@@ -10310,7 +10314,13 @@ async function loop(){
   try{
     let txt=null;
     if(det){const r=await det.detect(v);if(r.length)txt=r[0].rawValue}
-    else{const w=v.videoWidth,h=v.videoHeight,s=Math.min(1,720/Math.max(w,h));cv.width=w*s|0;cv.height=h*s|0;cx2.drawImage(v,0,0,cv.width,cv.height);const d=cx2.getImageData(0,0,cv.width,cv.height);const r=jsQR(d.data,d.width,d.height,{inversionAttempts:'dontInvert'});if(r)txt=r.data}
+    else{const w=v.videoWidth,h=v.videoHeight;pass++;
+      let sx,sy,sw,sh,out;
+      if(pass%3){const m=Math.min(w,h)*(pass%3===1?0.55:0.8);sx=(w-m)/2;sy=(h-m)/2;sw=sh=m;out=Math.min(560,m)}
+      else{sx=0;sy=0;sw=w;sh=h;out=null}
+      if(out){cv.width=cv.height=out|0}else{const s=Math.min(1,800/Math.max(w,h));cv.width=w*s|0;cv.height=h*s|0}
+      cx2.drawImage(v,sx,sy,sw,sh,0,0,cv.width,cv.height);
+      const d=cx2.getImageData(0,0,cv.width,cv.height);const r=jsQR(d.data,d.width,d.height,{inversionAttempts:'dontInvert'});if(r)txt=r.data}
     if(txt){const now=Date.now();if(txt!==last||now-lastT>5000){last=txt;lastT=now;onCode(txt)}}
   }catch(e){}
   busy=false;

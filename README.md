@@ -1,5 +1,7 @@
 # gomrah
 
-صفحة فحص بطاقات الدخول لمناسبة غمرة دانتي.
+دعوة غمرة دانتي: رابط واحد للضيوف مع عدّاد مشترك (230 مقعداً)، وصفحة فحص الدخول والإدارة.
 
-الرابط: https://ab0jwad.github.io/gomrah/
+- الضيوف: https://ab0jwad.github.io/gomrah/
+- فحص الدخول: https://ab0jwad.github.io/gomrah/#door
+- الإدارة: https://ab0jwad.github.io/gomrah/#admin

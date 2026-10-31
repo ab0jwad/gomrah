@@ -164,6 +164,7 @@ nav button.on{color:#fff;border-color:var(--gold);font-weight:700}
 #staff .st b{display:block;font-family:"Amiri",serif;font-size:34px;line-height:1.2;color:var(--wine);font-variant-numeric:tabular-nums}
 #staff .st span{font-size:14px;color:#6d5a45}
 #staff .st.big b{font-size:44px}
+.linkbtn{display:block;margin:12px auto 0;background:none;border:0;color:var(--wine,#5a0a0e);font:inherit;font-size:15px;text-decoration:underline;cursor:pointer}
 .toast{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;z-index:30}
 </style>
 </head>
@@ -266,9 +267,20 @@ nav button.on{color:#fff;border-color:var(--gold);font-weight:700}
   <div class="wrap">
     <div id="pinBox" class="box" hidden>
       <label for="pin">الرقم السري</label>
-      <input id="pin" inputmode="numeric" maxlength="6" placeholder="••••••" dir="ltr" style="text-align:center;letter-spacing:6px">
+      <input id="pin" inputmode="numeric" maxlength="8" placeholder="••••••" dir="ltr" style="text-align:center;letter-spacing:6px">
       <button class="btn" id="pinBtn" style="margin-top:12px"><svg class="ic" aria-hidden="true"><use href="#i-door"/></svg> دخول</button>
       <div class="msg err" id="pinErr" hidden></div>
+      <button class="linkbtn" id="forgotBtn" hidden>نسيت الرقم السري؟</button>
+    </div>
+    <div id="recBox" class="box" hidden>
+      <h3 style="margin:0 0 6px;color:var(--burg)">استرجاع الدخول</h3>
+      <p class="note">اكتبي رمز الاسترجاع الذي عندكِ، ثم رقماً سرياً جديداً.</p>
+      <label for="recCode">رمز الاسترجاع</label><input id="recCode" dir="ltr" placeholder="XXXX-XXXX-XXXX" autocomplete="off" style="text-align:center;text-transform:uppercase">
+      <label for="recNew">الرقم السري الجديد (4 إلى 8 أرقام)</label><input id="recNew" inputmode="numeric" maxlength="8" dir="ltr" style="text-align:center">
+      <label for="recNew2">تأكيد الرقم الجديد</label><input id="recNew2" inputmode="numeric" maxlength="8" dir="ltr" style="text-align:center">
+      <button class="btn" id="recBtn" style="margin-top:12px">حفظ الرقم الجديد والدخول</button>
+      <div class="msg err" id="recErr" hidden></div>
+      <button class="linkbtn" id="recBack">رجوع</button>
     </div>
 
     <section id="v-door" hidden>
@@ -322,6 +334,13 @@ nav button.on{color:#fff;border-color:var(--gold);font-weight:700}
         <h3 style="margin:0 0 6px;color:var(--burg)">العدد المسموح</h3>
         <p class="note" id="capInfo"></p>
         <div class="manual"><input id="capIn" inputmode="numeric" placeholder="مثال: 230"><button class="btn" id="capBtn">حفظ العدد</button></div>
+      </div>
+      <div class="box">
+        <h3 style="margin:0 0 6px;color:var(--burg)">رقمي السري</h3>
+        <p class="note">رقم الدخول لصفحة أم العروسة. من 4 إلى 8 أرقام.</p>
+        <label for="myNew">الرقم الجديد</label><input id="myNew" inputmode="numeric" maxlength="8" dir="ltr" style="text-align:center">
+        <label for="myNew2">تأكيد الرقم الجديد</label><input id="myNew2" inputmode="numeric" maxlength="8" dir="ltr" style="text-align:center">
+        <button class="btn" id="myBtn" style="margin-top:12px">تغيير رقمي</button>
       </div>
       <div class="box">
         <h3 style="margin:0 0 6px;color:var(--burg)">الرقم السري للموظفة</h3>
@@ -12840,9 +12859,17 @@ let PIN=ls.get(PKEY)||'', data=null, stats=null, view='door';
 function sView(v){view=v;document.querySelectorAll('#sNav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));['door','stats','list','more'].forEach(k=>$('v-'+k).hidden=k!==v);if(v!=='door')stopCam();render()}
 document.querySelectorAll('#sNav button').forEach(b=>b.onclick=()=>sView(b.dataset.v));
 async function load(){if(!PIN)return;try{stats=await rpc('staff_stats',{p_pin:PIN});if(MODE==='admin')data=await rpc('admin_list',{p_pin:PIN});render()}catch(e){if(/bad_pin|locked|not_admin/.test(e.message)){ls.del(PKEY);PIN='';showPin(e.message==='locked'?'محاولات كثيرة، انتظري 10 دقائق':'الرقم السري غير صحيح')}}}
-function showPin(err){$('pinBox').hidden=false;$('sNav').hidden=true;['door','stats','list','more'].forEach(k=>$('v-'+k).hidden=true);$('pinErr').textContent=err||'';$('pinErr').hidden=!err}
+function showPin(err){$('recBox').hidden=true;$('forgotBtn').hidden=MODE!=='admin';$('pinBox').hidden=false;$('sNav').hidden=true;['door','stats','list','more'].forEach(k=>$('v-'+k).hidden=true);$('pinErr').textContent=err||'';$('pinErr').hidden=!err}
 $('pinBtn').onclick=async()=>{const p=$('pin').value.trim();try{await rpc(MODE==='admin'?'admin_action':'staff_stats',MODE==='admin'?{p_pin:p,p_action:'ping'}:{p_pin:p});PIN=p;ls.set(PKEY,p);$('pinBox').hidden=true;$('sNav').hidden=false;sView(view);load()}catch(e){showPin(e.message==='locked'?'محاولات كثيرة، انتظري 10 دقائق':e.message==='not_admin'?'هذا رقم الموظفة، ولا يفتح صفحة الإدارة':'الرقم السري غير صحيح')}};
 $('pin').onkeydown=e=>{if(e.key==='Enter')$('pinBtn').click()};
+$('forgotBtn').onclick=()=>{$('pinBox').hidden=true;$('recBox').hidden=false;$('recErr').hidden=true};
+$('recBack').onclick=()=>showPin();
+const pinMsg={format:'الرقم من 4 إلى 8 أرقام',same_as_staff:'لا يكون نفس رقم الموظفة',same_as_admin:'لا يكون نفس رقم أم العروسة',bad_code:'رمز الاسترجاع غير صحيح',locked:'محاولات كثيرة، انتظري 10 دقائق'};
+$('recBtn').onclick=async()=>{const c=$('recCode').value,n=$('recNew').value.trim(),n2=$('recNew2').value.trim();const e=$('recErr');e.hidden=true;
+  if(n!==n2){e.textContent='الرقمان غير متطابقين';e.hidden=false;return}
+  try{const r=await rpc('admin_recover',{p_code:c,p_new:n});
+    if(r.ok){PIN=n;ls.set(PKEY,n);$('recBox').hidden=true;$('recCode').value='';$('recNew').value='';$('recNew2').value='';$('sNav').hidden=false;sView(view);load();toast('تم تغيير الرقم السري')}
+    else{e.textContent=pinMsg[r.err]||'تعذّر الحفظ';e.hidden=false}}catch(err){e.textContent='تعذّر الاتصال';e.hidden=false}};
 function counts(){const c=(data&&data.cards)||[];const taken=c.filter(x=>x.status==='taken');const P=x=>1+(x.companions||0);const tp=taken.reduce((s,x)=>s+P(x),0);const inn=taken.filter(x=>x.entered_at).reduce((s,x)=>s+P(x),0);return{taken:tp,inn,wait:tp-inn,cap:data?data.capacity:230}}
 function render(){
   if(stats){const s=stats;$('cIn').textContent=s.in_persons;$('cWait').textContent=s.wait_persons;$('cTaken').textContent=s.persons;
@@ -12896,8 +12923,11 @@ $('aBtn').onclick=async()=>{const nm=$('aName').value.trim(),ph=$('aPhone').valu
     else $('aRes').innerHTML=`<div class="msg err">${r.err==='full'?'اكتمل العدد':'تأكدي من البيانات'}</div>`}catch(e){toast('تعذّر الاتصال')}};
 $('resetBtn').onclick=async e=>{if(!twoTap(e.target,'متأكد؟ اضغط مرة أخرى للتصفير الكامل'))return;try{await rpc('admin_action',{p_pin:PIN,p_action:'reset_all'});toast('تم التصفير');load()}catch(err){toast('تعذّر الاتصال')}};
 $('logout').onclick=()=>{ls.del(PKEY);PIN='';showPin()};
+$('myBtn').onclick=async()=>{const n=$('myNew').value.trim(),n2=$('myNew2').value.trim();
+  if(!/^[0-9]{4,8}$/.test(n)){toast('اكتبي من 4 إلى 8 أرقام');return}if(n!==n2){toast('الرقمان غير متطابقين');return}
+  try{const r=await rpc('admin_set_own_pin',{p_pin:PIN,p_new:n});if(r.ok){PIN=n;ls.set(PKEY,n);$('myNew').value='';$('myNew2').value='';toast('تم تغيير رقمكِ السري')}else toast(pinMsg[r.err]||'الرقم غير مقبول')}catch(e){toast('تعذّر الاتصال')}};
 $('spBtn').onclick=async()=>{const n=$('spIn').value.trim();if(!/^[0-9]{4,8}$/.test(n)){toast('اكتب من 4 إلى 8 أرقام');return}
-  try{const r=await rpc('admin_set_staff_pin',{p_pin:PIN,p_new:n});if(r.ok){toast('تم حفظ رقم الموظفة');$('spIn').value=''}else toast(r.err==='same_as_admin'?'لا يكون نفس رقم الإدارة':'الرقم غير مقبول')}catch(e){toast('تعذّر الاتصال')}};
+  try{const r=await rpc('admin_set_staff_pin',{p_pin:PIN,p_new:n});if(r.ok){toast('تم حفظ رقم الموظفة');$('spIn').value=''}else toast(pinMsg[r.err]||'الرقم غير مقبول')}catch(e){toast('تعذّر الاتصال')}};
 
 /* ---- result screen ---- */
 let ac,showing=false;

@@ -159,6 +159,11 @@ nav button.on{color:#fff;border-color:var(--gold);font-weight:700}
 #guest .yewrap{display:flex;align-items:center;justify-content:center;gap:10px;margin:10px 0 0}
 #guest .yewrap::before,#guest .yewrap::after{content:"";height:1px;width:46px;background:linear-gradient(90deg,transparent,rgba(239,226,196,.7),transparent)}
 #staff .yeline{height:3px;margin:0 -16px;background:linear-gradient(#ce1126 0 33.34%,#fff 33.34% 66.67%,#000 66.67%);opacity:.9}
+#staff .stats{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:8px 4px 0}
+#staff .st{background:#f7efdd;border:1.5px solid var(--wine);box-shadow:0 0 0 3px #f7efdd,0 0 0 4.5px var(--gold);border-radius:12px;padding:14px 8px;text-align:center}
+#staff .st b{display:block;font-family:"Amiri",serif;font-size:34px;line-height:1.2;color:var(--wine);font-variant-numeric:tabular-nums}
+#staff .st span{font-size:14px;color:#6d5a45}
+#staff .st.big b{font-size:44px}
 .toast{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;z-index:30}
 </style>
 </head>
@@ -253,8 +258,9 @@ nav button.on{color:#fff;border-color:var(--gold);font-weight:700}
     <h2><span id="sTitle">الإدارة</span><small id="sHdr"></small></h2>
     <nav id="sNav">
       <button data-v="door">الفحص</button>
-      <button data-v="list">الضيوف</button>
-      <button data-v="more">المزيد</button>
+      <button data-v="stats">الإحصاء</button>
+      <button data-v="list" data-admin="1">الضيوف</button>
+      <button data-v="more" data-admin="1">المزيد</button>
     </nav>
   </div>
   <div class="wrap">
@@ -281,6 +287,21 @@ nav button.on{color:#fff;border-color:var(--gold);font-weight:700}
       <div class="msg err" id="camErr" hidden></div>
     </section>
 
+    <section id="v-stats" hidden>
+      <div class="stats">
+        <div class="st big"><b id="st_persons">0</b><span>المؤكدون (أشخاص)</span></div>
+        <div class="st big"><b id="st_in">0</b><span>دخلوا (أشخاص)</span></div>
+        <div class="st"><b id="st_wait">0</b><span>لم يصلوا (أشخاص)</span></div>
+        <div class="st"><b id="st_cards">0</b><span>بطاقات مؤكدة</span></div>
+        <div class="st"><b id="st_compc">0</b><span>بطاقات مع مرافقين</span></div>
+        <div class="st"><b id="st_comp">0</b><span>عدد المرافقين</span></div>
+        <div class="st"><b id="st_cx">0</b><span>بطاقات ملغاة</span></div>
+        <div class="st"><b id="st_dec">0</b><span>اعتذروا</span></div>
+        <div class="st"><b id="st_cap">0</b><span>العدد المسموح</span></div>
+        <div class="st"><b id="st_left">0</b><span>المتبقي من العدد</span></div>
+      </div>
+      <p class="note" style="text-align:center;color:var(--sand)">تتحدث تلقائياً كل 5 ثوانٍ</p>
+    </section>
     <section id="v-list" hidden>
       <input id="q" placeholder="ابحث بالاسم أو الجوال أو رقم البطاقة">
       <div class="filters" id="filters">
@@ -301,6 +322,11 @@ nav button.on{color:#fff;border-color:var(--gold);font-weight:700}
         <h3 style="margin:0 0 6px;color:var(--burg)">العدد المسموح</h3>
         <p class="note" id="capInfo"></p>
         <div class="manual"><input id="capIn" inputmode="numeric" placeholder="مثال: 230"><button class="btn" id="capBtn">حفظ العدد</button></div>
+      </div>
+      <div class="box">
+        <h3 style="margin:0 0 6px;color:var(--burg)">الرقم السري للموظفة</h3>
+        <p class="note">رقم الموظفة يفتح الفحص والإحصاء فقط، ولا يفتح الإدارة. من 4 إلى 8 أرقام.</p>
+        <div class="manual"><input id="spIn" inputmode="numeric" maxlength="8" placeholder="رقم جديد" dir="ltr"><button class="btn" id="spBtn">حفظ</button></div>
       </div>
       <div class="box">
         <h3 style="margin:0 0 6px;color:var(--burg)">رسالة الدعوة</h3>
@@ -12807,15 +12833,23 @@ $('gSave').onclick=async()=>{
   $('gSaveHelp').hidden=false;$('gCardImg').scrollIntoView({behavior:'smooth',block:'center'})};
 
 /* ================= STAFF ================= */
-let PIN=ls.get('s_pin')||'', data=null, view='door';
-function sView(v){view=v;document.querySelectorAll('#sNav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));['door','list','more'].forEach(k=>$('v-'+k).hidden=k!==v);if(v!=='door')stopCam();render()}
+const HASH=(()=>{try{return decodeURIComponent(location.hash.replace('#',''))}catch(e){return location.hash.replace('#','')}})();
+const IS_ADMIN=['admin','أم-العروسة','ام-العروسة','أم_العروسة','ام_العروسة'].includes(HASH);
+const MODE=IS_ADMIN?'admin':'door';const PKEY=MODE==='admin'?'s_pin_admin':'s_pin_door';
+let PIN=ls.get(PKEY)||'', data=null, stats=null, view='door';
+function sView(v){view=v;document.querySelectorAll('#sNav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));['door','stats','list','more'].forEach(k=>$('v-'+k).hidden=k!==v);if(v!=='door')stopCam();render()}
 document.querySelectorAll('#sNav button').forEach(b=>b.onclick=()=>sView(b.dataset.v));
-async function load(){if(!PIN)return;try{data=await rpc('admin_list',{p_pin:PIN});render()}catch(e){if(/bad_pin|locked/.test(e.message)){ls.del('s_pin');PIN='';showPin(e.message==='locked'?'محاولات كثيرة، انتظري 10 دقائق':'الرقم السري غير صحيح')}}}
-function showPin(err){$('pinBox').hidden=false;$('sNav').hidden=true;['door','list','more'].forEach(k=>$('v-'+k).hidden=true);$('pinErr').textContent=err||'';$('pinErr').hidden=!err}
-$('pinBtn').onclick=async()=>{const p=$('pin').value.trim();try{await rpc('admin_action',{p_pin:p,p_action:'ping'});PIN=p;ls.set('s_pin',p);$('pinBox').hidden=true;$('sNav').hidden=false;sView(view);load()}catch(e){showPin(e.message==='locked'?'محاولات كثيرة، انتظري 10 دقائق':'الرقم السري غير صحيح')}};
+async function load(){if(!PIN)return;try{stats=await rpc('staff_stats',{p_pin:PIN});if(MODE==='admin')data=await rpc('admin_list',{p_pin:PIN});render()}catch(e){if(/bad_pin|locked|not_admin/.test(e.message)){ls.del(PKEY);PIN='';showPin(e.message==='locked'?'محاولات كثيرة، انتظري 10 دقائق':'الرقم السري غير صحيح')}}}
+function showPin(err){$('pinBox').hidden=false;$('sNav').hidden=true;['door','stats','list','more'].forEach(k=>$('v-'+k).hidden=true);$('pinErr').textContent=err||'';$('pinErr').hidden=!err}
+$('pinBtn').onclick=async()=>{const p=$('pin').value.trim();try{await rpc(MODE==='admin'?'admin_action':'staff_stats',MODE==='admin'?{p_pin:p,p_action:'ping'}:{p_pin:p});PIN=p;ls.set(PKEY,p);$('pinBox').hidden=true;$('sNav').hidden=false;sView(view);load()}catch(e){showPin(e.message==='locked'?'محاولات كثيرة، انتظري 10 دقائق':e.message==='not_admin'?'هذا رقم الموظفة، ولا يفتح صفحة الإدارة':'الرقم السري غير صحيح')}};
 $('pin').onkeydown=e=>{if(e.key==='Enter')$('pinBtn').click()};
 function counts(){const c=(data&&data.cards)||[];const taken=c.filter(x=>x.status==='taken');const P=x=>1+(x.companions||0);const tp=taken.reduce((s,x)=>s+P(x),0);const inn=taken.filter(x=>x.entered_at).reduce((s,x)=>s+P(x),0);return{taken:tp,inn,wait:tp-inn,cap:data?data.capacity:230}}
-function render(){if(!data)return;const k=counts();$('capInfo').textContent='العدد الحالي: '+k.cap+' شخصاً — المؤكدون الآن: '+k.taken+' — المتبقي: '+Math.max(0,k.cap-k.taken);$('cIn').textContent=k.inn;$('cWait').textContent=k.wait;$('cTaken').textContent=k.taken;$('sHdr').textContent='دخل '+k.inn+' · مؤكد '+k.taken+' / '+k.cap+' شخصاً';if(view==='list')renderList()}
+function render(){
+  if(stats){const s=stats;$('cIn').textContent=s.in_persons;$('cWait').textContent=s.wait_persons;$('cTaken').textContent=s.persons;
+    $('sHdr').textContent='دخل '+s.in_persons+' · مؤكد '+s.persons+' / '+s.capacity+' شخصاً';
+    const set=(id,v)=>{$(id).textContent=v};set('st_persons',s.persons);set('st_in',s.in_persons);set('st_wait',s.wait_persons);set('st_cards',s.cards);set('st_compc',s.comp_cards);set('st_comp',s.companions);set('st_cx',s.cancelled);set('st_dec',s.declines);set('st_cap',s.capacity);set('st_left',Math.max(0,s.capacity-s.persons));
+    $('capInfo').textContent='العدد الحالي: '+s.capacity+' شخصاً — المؤكدون الآن: '+s.persons+' — المتبقي: '+Math.max(0,s.capacity-s.persons)}
+  if(MODE==='admin'&&data&&view==='list')renderList()}
 let filt='taken';
 document.querySelectorAll('#filters button').forEach(b=>b.onclick=()=>{filt=b.dataset.f;document.querySelectorAll('#filters button').forEach(x=>x.classList.toggle('on',x===b));renderList()});
 $('q').oninput=()=>renderList();
@@ -12861,7 +12895,9 @@ $('aBtn').onclick=async()=>{const nm=$('aName').value.trim(),ph=$('aPhone').valu
     if(r.ok){const c={no:r.no,name:r.name,phone:normPhone(ph)};$('aRes').innerHTML=`<div class="msg ok">أُضيفت ${esc(r.name)} برقم ${pad(r.no)}${r.existing?' (موجودة مسبقاً)':''}</div><a class="btn sec" style="margin-top:8px" target="_blank" rel="noopener" href="https://wa.me/${c.phone}?text=${encodeURIComponent(remindText(c))}">إرسال الرابط لها في الواتساب</a>`;$('aName').value='';$('aPhone').value='';load()}
     else $('aRes').innerHTML=`<div class="msg err">${r.err==='full'?'اكتمل العدد':'تأكدي من البيانات'}</div>`}catch(e){toast('تعذّر الاتصال')}};
 $('resetBtn').onclick=async e=>{if(!twoTap(e.target,'متأكد؟ اضغط مرة أخرى للتصفير الكامل'))return;try{await rpc('admin_action',{p_pin:PIN,p_action:'reset_all'});toast('تم التصفير');load()}catch(err){toast('تعذّر الاتصال')}};
-$('logout').onclick=()=>{ls.del('s_pin');PIN='';showPin()};
+$('logout').onclick=()=>{ls.del(PKEY);PIN='';showPin()};
+$('spBtn').onclick=async()=>{const n=$('spIn').value.trim();if(!/^[0-9]{4,8}$/.test(n)){toast('اكتب من 4 إلى 8 أرقام');return}
+  try{const r=await rpc('admin_set_staff_pin',{p_pin:PIN,p_new:n});if(r.ok){toast('تم حفظ رقم الموظفة');$('spIn').value=''}else toast(r.err==='same_as_admin'?'لا يكون نفس رقم الإدارة':'الرقم غير مقبول')}catch(e){toast('تعذّر الاتصال')}};
 
 /* ---- result screen ---- */
 let ac,showing=false;
@@ -12877,7 +12913,7 @@ async function checkin(code,no){
     else if(r.r==='cancelled')show(false,'بطاقة ملغاة',r.name+' — ألغت حضورها',r.no);
     else show(false,'بطاقة غير صحيحة','الباركود ليس من بطاقات المناسبة');
     load();
-  }catch(e){show(false,'تعذّر الاتصال','تأكدي من الإنترنت وحاولي مرة أخرى')}}
+  }catch(e){if(/bad_pin|locked/.test(e.message)){ls.del(PKEY);PIN='';showPin('الرقم السري تغيّر، اكتبيه من جديد');return}show(false,'تعذّر الاتصال','تأكدي من الإنترنت وحاولي مرة أخرى')}}
 function onCode(t){t=(t||'').trim().toUpperCase();const m=t.match(/\d{3}-[A-Z0-9]{6}/);if(!m){show(false,'بطاقة غير صحيحة','الباركود ليس من بطاقات المناسبة');return}checkin(m[0])}
 $('manBtn').onclick=()=>{const n=parseInt($('manNum').value,10);$('manNum').value='';if(n>0)checkin(null,n)};
 $('manNum').onkeydown=e=>{if(e.key==='Enter')$('manBtn').click()};
@@ -12912,9 +12948,9 @@ $('photo').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)
 
 /* ================= ROUTER ================= */
 function route(){
-  const h=location.hash.replace('#','');
+  const h=IS_ADMIN?'admin':HASH;
   if(h==='door'||h==='admin'){
-    $('guest').hidden=true;$('staff').hidden=false;view=h==='admin'?'list':'door';$('sTitle').textContent=h==='admin'?'إدارة الغمرة':'فحص الدخول';
+    $('guest').hidden=true;$('staff').hidden=false;view=h==='admin'?'list':'door';if(h!=='admin')document.querySelectorAll('#sNav [data-admin]').forEach(b=>b.remove());$('sTitle').textContent=h==='admin'?'أم العروسة':'فحص الدخول';
     if(PIN){$('pinBox').hidden=true;$('sNav').hidden=false;sView(view);load()}else showPin();
   }else{$('staff').hidden=true;stopCam();guestInit()}
 }

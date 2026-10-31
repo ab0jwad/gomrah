@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-title" content="غمرة دانة">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <script>(function(){var h='';try{h=decodeURIComponent(location.hash.slice(1))}catch(e){h=location.hash.slice(1)}
-var adm=['admin','أم-العروسة','ام-العروسة','أم_العروسة','ام_العروسة'].indexOf(h)>=0,door=h==='door';if(!adm&&!door)return;
+var adm=['um','admin','أم-العروسة','ام-العروسة','أم_العروسة','ام_العروسة'].indexOf(h)>=0,door=h==='door';if(!adm&&!door)return;
 var k=adm?'admin':'door',nm=adm?'أم العروسة':'فحص الدخول';
 document.getElementById('mf').setAttribute('href','manifest-'+k+'.json');
 document.querySelectorAll('link[rel="apple-touch-icon"]').forEach(function(l){l.setAttribute('href','apple-touch-icon-'+k+'.png')});
@@ -12934,7 +12934,7 @@ $('gSave').onclick=async()=>{
 
 /* ================= STAFF ================= */
 const HASH=(()=>{try{return decodeURIComponent(location.hash.replace('#',''))}catch(e){return location.hash.replace('#','')}})();
-const IS_ADMIN=['admin','أم-العروسة','ام-العروسة','أم_العروسة','ام_العروسة'].includes(HASH);
+const IS_ADMIN=['um','admin','أم-العروسة','ام-العروسة','أم_العروسة','ام_العروسة'].includes(HASH);
 const MODE=IS_ADMIN?'admin':'door';const PKEY=MODE==='admin'?'s_pin_admin':'s_pin_door';
 let PIN=ls.get(PKEY)||'', data=null, stats=null, view='door';
 function sView(v){view=v;document.querySelectorAll('#sNav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));['door','stats','list','more'].forEach(k=>$('v-'+k).hidden=k!==v);if(v!=='door')stopCam();render()}

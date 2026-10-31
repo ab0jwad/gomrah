@@ -4,4 +4,4 @@
 
 - الضيوف: https://ab0jwad.github.io/gomrah/
 - فحص الدخول: https://ab0jwad.github.io/gomrah/#door
-- الإدارة: https://ab0jwad.github.io/gomrah/#admin
+- أم العروسة: https://ab0jwad.github.io/gomrah/#um

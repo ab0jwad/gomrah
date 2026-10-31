@@ -103,7 +103,6 @@ nav button.on{color:#fff;border-color:var(--gold);font-weight:700}
         <p class="note center" id="gSaveHelp" hidden>اضغطي مطوّلاً على البطاقة في الأعلى، ثم اختاري «حفظ في الصور» أو «تنزيل الصورة».</p>
         <a class="btn sec" href="https://maps.app.goo.gl/qinSGP4HHEeGfou36" target="_blank" rel="noopener">📍 موقع القاعة</a>
         <button class="btn ghost" id="gCancel">لن أتمكن من الحضور — إلغاء بطاقتي</button>
-        <button class="btn sec" id="gOther" style="font-size:15px">بطاقة لشخص آخر من هذا الجوال</button>
       </div>
     </div>
 
@@ -12657,7 +12656,7 @@ function gRead(needName){const nm=$('gName').value.trim(),ph=$('gPhone').value.t
   gErr('');return{nm,ph}}
 $('gYes').onclick=async e=>{const v=gRead(true);if(!v)return;const b=e.target;b.disabled=true;
   try{const r=await rpc('guest_claim',{p_name:v.nm,p_phone:v.ph,p_device:gDev});
-    if(r.ok){gPhone=v.ph;gName=v.nm;ls.set('g_phone',v.ph);ls.set('g_name',v.nm);await gShowCard(r);gStatus()}
+    if(r.ok){if(!r.same_device){gPhone=v.ph;gName=v.nm;ls.set('g_phone',v.ph);ls.set('g_name',v.nm)}else{gName=r.name;ls.set('g_name',r.name)}await gShowCard(r)}
     else if(r.err==='other_device')gErr(OTHER_DEV);
     else if(r.err==='full')gDone('نعتذر، اكتمل العدد','شكراً لكِ، ونتمنى رؤيتكِ في مناسبة قادمة.');
     else gErr('تأكدي من الاسم ورقم الجوال');
@@ -12666,7 +12665,6 @@ $('gNo').onclick=async e=>{const v=gRead(false);if(!v)return;const b=e.target;if
   try{const d=await rpc('guest_decline',{p_name:v.nm,p_phone:v.ph,p_device:gDev});if(d.err==='other_device'){gErr(OTHER_DEV);b.disabled=false;return}ls.del('g_phone');gDone('شكراً لإبلاغنا','نتمنى لكِ كل الخير.');gStatus()}catch(err){gErr('تعذّر الاتصال، حاولي مرة أخرى')}b.disabled=false};
 $('gCancel').onclick=async e=>{const b=e.target;if(!twoTap(b,'متأكدة؟ اضغطي مرة أخرى لإلغاء البطاقة'))return;b.disabled=true;
   try{const d=await rpc('guest_decline',{p_name:gName,p_phone:gPhone,p_device:gDev});if(d.err==='other_device'){toast(OTHER_DEV);b.disabled=false;return}ls.del('g_phone');gPhone='';$('gPhone').value='';gDone('أُلغيت بطاقتكِ','شكراً لإبلاغنا، وأُتيح مقعدكِ لضيفة أخرى.');gStatus()}catch(err){toast('تعذّر الاتصال، حاولي مرة أخرى')}b.disabled=false};
-$('gOther').onclick=()=>{ls.del('g_phone');ls.del('g_name');gPhone='';gName='';$('gName').value='';$('gPhone').value='';gShow('gForm')};
 $('gBack').onclick=()=>gShow('gForm');
 let cardURL='';
 $('gSave').onclick=async()=>{

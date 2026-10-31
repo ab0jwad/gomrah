@@ -162,7 +162,8 @@ nav button.on{color:#fff;border-color:var(--gold);font-weight:700}
         <button data-f="comp">مع مرافقين</button>
         <button data-f="in">دخلن</button>
         <button data-f="wait">لم يصلن</button>
-        <button data-f="norem">بدون تذكير</button>
+        <button data-f="norem">لم أذكّرها</button>
+        <button data-f="rem">ذكّرتها</button>
         <button data-f="cx">ملغاة</button>
         <button data-f="dec">اعتذرن</button>
       </div>
@@ -171,9 +172,19 @@ nav button.on{color:#fff;border-color:var(--gold);font-weight:700}
 
     <section id="v-more" hidden>
       <div class="box">
-        <h3 style="margin:0 0 6px;color:var(--burg)">رابط الدعوة للضيوف</h3>
-        <p class="note" style="direction:ltr;text-align:left;word-break:break-all" id="guestLink"></p>
-        <button class="btn sec" id="copyLink" style="margin-top:10px">نسخ رابط الدعوة</button>
+        <h3 style="margin:0 0 6px;color:var(--burg)">العدد المسموح</h3>
+        <p class="note" id="capInfo"></p>
+        <div class="manual"><input id="capIn" inputmode="numeric" placeholder="مثال: 230"><button class="btn" id="capBtn">حفظ العدد</button></div>
+      </div>
+      <div class="box">
+        <h3 style="margin:0 0 6px;color:var(--burg)">رسالة الدعوة</h3>
+        <p class="note">عدّل النص كما تحب. عند النسخ يُنسخ النص مع الرابط جاهزاً للإرسال.</p>
+        <textarea id="invTxt" rows="9" style="width:100%;font:inherit;font-size:15px;line-height:1.8;padding:12px;border-radius:12px;border:2px solid var(--line);background:#fff;color:var(--ink);margin-top:8px"></textarea>
+        <div class="row2">
+          <button class="btn" id="copyInv">📋 نسخ الدعوة</button>
+          <a class="btn sec" id="waInv" target="_blank" rel="noopener">إرسال واتساب</a>
+        </div>
+        <button class="btn sec" id="resetInv" style="margin-top:10px;font-size:14px;padding:10px">إرجاع النص الأصلي</button>
       </div>
       <div class="box">
         <h3 style="margin:0 0 6px;color:var(--burg)">إضافة ضيفة يدوياً</h3>
@@ -12679,25 +12690,28 @@ function showPin(err){$('pinBox').hidden=false;$('sNav').hidden=true;['door','li
 $('pinBtn').onclick=async()=>{const p=$('pin').value.trim();try{await rpc('admin_action',{p_pin:p,p_action:'ping'});PIN=p;ls.set('s_pin',p);$('pinBox').hidden=true;$('sNav').hidden=false;sView(view);load()}catch(e){showPin(e.message==='locked'?'محاولات كثيرة، انتظري 10 دقائق':'الرقم السري غير صحيح')}};
 $('pin').onkeydown=e=>{if(e.key==='Enter')$('pinBtn').click()};
 function counts(){const c=(data&&data.cards)||[];const taken=c.filter(x=>x.status==='taken');const P=x=>1+(x.companions||0);const tp=taken.reduce((s,x)=>s+P(x),0);const inn=taken.filter(x=>x.entered_at).reduce((s,x)=>s+P(x),0);return{taken:tp,inn,wait:tp-inn,cap:data?data.capacity:230}}
-function render(){if(!data)return;const k=counts();$('cIn').textContent=k.inn;$('cWait').textContent=k.wait;$('cTaken').textContent=k.taken;$('sHdr').textContent='دخل '+k.inn+' · مؤكد '+k.taken+' / '+k.cap+' شخصاً';if(view==='list')renderList()}
+function render(){if(!data)return;const k=counts();$('capInfo').textContent='العدد الحالي: '+k.cap+' شخصاً — المؤكدون الآن: '+k.taken+' — المتبقي: '+Math.max(0,k.cap-k.taken);$('cIn').textContent=k.inn;$('cWait').textContent=k.wait;$('cTaken').textContent=k.taken;$('sHdr').textContent='دخل '+k.inn+' · مؤكد '+k.taken+' / '+k.cap+' شخصاً';if(view==='list')renderList()}
 let filt='taken';
 document.querySelectorAll('#filters button').forEach(b=>b.onclick=()=>{filt=b.dataset.f;document.querySelectorAll('#filters button').forEach(x=>x.classList.toggle('on',x===b));renderList()});
 $('q').oninput=()=>renderList();
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const showPh=p=>p&&p.startsWith('966')?'0'+p.slice(3):p;
+const fmtT=s=>{const d=new Date(s);return d.toLocaleDateString('ar-SA-u-ca-gregory',{day:'numeric',month:'numeric'})+' '+d.toLocaleTimeString('ar-SA',{hour:'2-digit',minute:'2-digit'})};
 function remindText(c){return 'حياكِ الله '+c.name+' 🌸\nنذكّركِ بمناسبة غمرة دانتي يوم السبت 18/06/1448هـ الموافق 28/11/2026م.\nبطاقة دخولكِ رقم '+pad(c.no)+(c.companions>0?(' (عدد الأشخاص '+(1+c.companions)+')'):'')+'، وتظهر لكِ من رابط الدعوة:\n'+GUEST_URL+'\n📍 موقع القاعة: '+MAPS+'\nوإذا لم تتمكني من الحضور، نرجو الإلغاء من نفس الرابط ليُتاح المقعد لغيركِ.'}
+function filterCounts(){const C=data.cards,T=C.filter(c=>c.status==='taken');const n={taken:T.length,comp:T.filter(c=>c.companions>0).length,in:T.filter(c=>c.entered_at).length,wait:T.filter(c=>!c.entered_at).length,norem:T.filter(c=>!c.reminded_at&&!c.entered_at).length,rem:T.filter(c=>c.reminded_at).length,cx:C.filter(c=>c.status==='cancelled').length,dec:(data.declines||[]).length};
+  document.querySelectorAll('#filters button').forEach(b=>{if(!b.dataset.l)b.dataset.l=b.textContent;b.textContent=b.dataset.l+' ('+(n[b.dataset.f]||0)+')'})}
 function renderList(){
-  const q=$('q').value.trim();let items;
+  filterCounts();const q=$('q').value.trim();let items;
   if(filt==='dec'){items=(data.declines||[]).filter(d=>!q||(d.name||'').includes(q)||(d.phone||'').includes(normPhone(q)||q));
     $('rows').innerHTML=items.map(d=>`<div class="item"><div class="h"><span class="nm">${esc(d.name)||'—'}</span><span class="ph">${esc(showPh(d.phone))}</span><span class="chip cx">اعتذرت</span></div></div>`).join('')||'<p class="note">لا يوجد.</p>';return}
   items=data.cards.filter(c=>{
     if(q&&!((c.name||'').includes(q)||(c.phone||'').includes(normPhone(q)||'@')||pad(c.no).includes(q)))return false;
-    switch(filt){case'taken':return c.status==='taken';case'comp':return c.status==='taken'&&c.companions>0;case'in':return c.status==='taken'&&c.entered_at;case'wait':return c.status==='taken'&&!c.entered_at;case'norem':return c.status==='taken'&&!c.reminded_at&&!c.entered_at;case'cx':return c.status==='cancelled'}return true});
-  $('rows').innerHTML=items.map(c=>{const ch=[];if(c.status==='cancelled')ch.push('<span class="chip cx">ملغاة</span>');if(c.entered_at)ch.push('<span class="chip in">دخلت</span>');if(c.reminded_at&&!c.entered_at)ch.push('<span class="chip rm">ذُكّرت</span>');if(c.companions>0)ch.push('<span class="chip in" style="background:#eef0e4;color:#55623a">+'+c.companions+' مرافق</span>');
+    switch(filt){case'taken':return c.status==='taken';case'comp':return c.status==='taken'&&c.companions>0;case'in':return c.status==='taken'&&c.entered_at;case'wait':return c.status==='taken'&&!c.entered_at;case'norem':return c.status==='taken'&&!c.reminded_at&&!c.entered_at;case'rem':return c.status==='taken'&&!!c.reminded_at;case'cx':return c.status==='cancelled'}return true});
+  $('rows').innerHTML=items.map(c=>{const ch=[];if(c.status==='cancelled')ch.push('<span class="chip cx">ملغاة</span>');if(c.entered_at)ch.push('<span class="chip in">دخلت</span>');if(c.status==='taken'&&!c.entered_at)ch.push(c.reminded_at?'<span class="chip rm">✓ ذُكّرت '+fmtT(c.reminded_at)+'</span>':'<span class="chip" style="background:#fff4e0;color:#9a5b00">لم تُذكَّر</span>');if(c.companions>0)ch.push('<span class="chip in" style="background:#eef0e4;color:#55623a">+'+c.companions+' مرافق</span>');
     const a=[];if(c.status==='taken'){a.push(`<button data-a="comp_dec" data-n="${c.no}" data-q="1">− مرافق</button>`);a.push(`<button data-a="comp_inc" data-n="${c.no}" data-q="1">+ مرافق</button>`)}
     if(c.status==='taken'&&!c.entered_at)a.push(`<button data-a="manual_in" data-n="${c.no}">دخول يدوي</button>`);
     if(c.status==='taken'&&c.bound)a.push(`<button data-a="release" data-n="${c.no}">فك ربط الجوال</button>`);
-    if(c.status==='taken'&&!c.entered_at){a.push(`<a data-rem="${c.no}" target="_blank" rel="noopener" href="https://wa.me/${c.phone}?text=${encodeURIComponent(remindText(c))}">🔔 تذكير</a>`);a.push(`<button data-a="cancel" data-n="${c.no}">إلغاء البطاقة</button>`)}
+    if(c.status==='taken'&&!c.entered_at){a.push(`<a data-rem="${c.no}" target="_blank" rel="noopener" href="https://wa.me/${c.phone}?text=${encodeURIComponent(remindText(c))}">🔔 ${c.reminded_at?'تذكير مرة أخرى':'تذكير'}</a>`);if(c.reminded_at)a.push(`<button data-a="unremind" data-n="${c.no}" data-q="1">لم أرسل التذكير</button>`);a.push(`<button data-a="cancel" data-n="${c.no}">إلغاء البطاقة</button>`)}
     if(c.entered_at)a.push(`<button data-a="undo_entry" data-n="${c.no}">إلغاء الدخول</button>`);
     return `<div class="item"><div class="h"><span class="n">${pad(c.no)}</span><span class="nm">${esc(c.name)}</span><span class="ph">${esc(showPh(c.phone))}</span>${ch.join('')}</div>${a.length?'<div class="acts">'+a.join('')+'</div>':''}</div>`}).join('')||'<p class="note">لا يوجد.</p>'}
 $('rows').onclick=async e=>{const ln=e.target.closest('a[data-rem]');if(ln){rpc('admin_action',{p_pin:PIN,p_action:'reminded',p_no:+ln.dataset.rem}).then(load);return}
@@ -12705,8 +12719,18 @@ $('rows').onclick=async e=>{const ln=e.target.closest('a[data-rem]');if(ln){rpc(
   try{if(b.dataset.a==='manual_in'){await checkin(null,+b.dataset.n);return}
     const r=await rpc('admin_action',{p_pin:PIN,p_action:b.dataset.a,p_no:+b.dataset.n});
     toast(r&&r.err==='full'?'لا يمكن: العدد مكتمل':'تم');load()}catch(err){toast('تعذّر الاتصال')}};
-$('guestLink').textContent=GUEST_URL;
-$('copyLink').onclick=async()=>{try{await navigator.clipboard.writeText(GUEST_URL);toast('نُسخ الرابط')}catch(e){toast('انسخي الرابط من الأعلى')}};
+const INV_DEFAULT='حياكم الله 🌸\nيسعدنا دعوتكم لحضور مناسبة غمرة دانتي\n📅 يوم السبت 18/06/1448هـ الموافق 28/11/2026م\n📍 موقع القاعة: '+MAPS+'\n\nلتأكيد الحضور أو الاعتذار واستلام بطاقة الدخول، افتحوا الرابط:\n'+GUEST_URL+'\n\nالعدد محدود، نرجو التأكيد مبكراً 🤍';
+function invText(){let t=$('invTxt').value.trim()||INV_DEFAULT;if(!t.includes(GUEST_URL))t+='\n'+GUEST_URL;return t}
+function invSync(){$('waInv').href='https://wa.me/?text='+encodeURIComponent(invText())}
+$('invTxt').value=ls.get('inv_txt')||INV_DEFAULT;invSync();
+$('invTxt').oninput=()=>{ls.set('inv_txt',$('invTxt').value);invSync()};
+$('resetInv').onclick=()=>{$('invTxt').value=INV_DEFAULT;ls.del('inv_txt');invSync();toast('رجع النص الأصلي')};
+$('copyInv').onclick=async()=>{const t=invText();try{await navigator.clipboard.writeText(t);toast('نُسخت الدعوة مع الرابط')}catch(e){$('invTxt').focus();$('invTxt').select();toast('انسخ النص المحدد')}};
+$('capBtn').onclick=async()=>{const n=parseInt($('capIn').value,10);if(!(n>0)){toast('اكتب رقماً صحيحاً');return}
+  try{const r=await rpc('admin_action',{p_pin:PIN,p_action:'set_cap',p_no:n});
+    if(r.ok){toast('صار العدد '+n);$('capIn').value='';load()}
+    else if(r.err==='below')toast('لا يمكن أقل من المؤكدين حالياً ('+r.used+')');
+    else toast('الرقم غير مقبول')}catch(e){toast('تعذّر الاتصال')}};
 $('aBtn').onclick=async()=>{const nm=$('aName').value.trim(),ph=$('aPhone').value.trim();if(nm.length<2||normPhone(ph).length<11){toast('اكتبي الاسم والجوال');return}
   try{const r=await rpc('admin_action',{p_pin:PIN,p_action:'add',p_name:nm,p_phone:ph});
     if(r.ok){const c={no:r.no,name:r.name,phone:normPhone(ph)};$('aRes').innerHTML=`<div class="msg ok">أُضيفت ${esc(r.name)} برقم ${pad(r.no)}${r.existing?' (موجودة مسبقاً)':''}</div><a class="btn sec" style="margin-top:8px" target="_blank" rel="noopener" href="https://wa.me/${c.phone}?text=${encodeURIComponent(remindText(c))}">إرسال الرابط لها في الواتساب</a>`;$('aName').value='';$('aPhone').value='';load()}

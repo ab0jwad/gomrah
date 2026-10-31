@@ -77,11 +77,6 @@ nav button.on{color:#fff;border-color:var(--gold);font-weight:700}
     <h1>غمرة دانتي</h1>
     <p class="sub">يسعدنا حضوركِ يوم <b>السبت 18/06/1448هـ</b><br>الموافق <b>28/11/2026م</b></p>
 
-    <div class="box">
-      <div class="meter"><span>المقاعد المؤكدة</span><span><b id="gTaken">–</b> / <span id="gCap">230</span></span></div>
-      <div class="bar"><i id="gBar" style="width:0"></i></div>
-      <p class="note" id="gLeft"></p>
-    </div>
 
     <!-- form -->
     <div class="box" id="gForm">
@@ -12623,7 +12618,7 @@ function normPhone(p){p=String(p||'').replace(/\D/g,'');if(p.startsWith('00'))p=
 let gPhone=ls.get('g_phone')||'', gName=ls.get('g_name')||'';
 let gDev=ls.get('g_dev');if(!gDev){const a=new Uint8Array(16);crypto.getRandomValues(a);gDev='d'+Array.from(a,b=>b.toString(16).padStart(2,'0')).join('');ls.set('g_dev',gDev)}
 const OTHER_DEV='هذه البطاقة مسجّلة على جوال آخر. إذا غيّرتِ جوالكِ، تواصلي مع صاحبة الدعوة.';
-async function gStatus(){try{const s=await rpc('guest_status');$('gTaken').textContent=s.taken;$('gCap').textContent=s.capacity;$('gBar').style.width=Math.min(100,s.taken/s.capacity*100)+'%';const left=s.capacity-s.taken;$('gLeft').textContent=left>0?('تبقّى '+left+' مقعداً'):'اكتمل العدد';return s}catch(e){$('gLeft').textContent='تعذّر الاتصال، تأكدي من الإنترنت';return null}}
+async function gStatus(){return null}
 function gShow(which){['gForm','gCard','gDone'].forEach(id=>$(id).hidden=id!==which)}
 function gErr(t){const e=$('gErr');e.textContent=t;e.hidden=!t}
 const heroReady=new Promise(res=>{const i=$('heroImg');if(i.complete&&i.naturalWidth)res(i);else{i.onload=()=>res(i);i.onerror=()=>res(null)}});
@@ -12654,7 +12649,6 @@ async function gShowCard(r){
 function gDone(t,s){$('gDoneT').textContent=t;$('gDoneS').textContent=s||'';gShow('gDone')}
 async function guestInit(){
   $('guest').hidden=false;$('gName').value=gName;$('gPhone').value=gPhone;
-  await gStatus();setInterval(gStatus,15000);
   if(gPhone){try{const r=await rpc('guest_my_card',{p_phone:gPhone,p_device:gDev});if(r.ok){r.existing=true;await gShowCard(r)}}catch(e){}}
 }
 function gRead(needName){const nm=$('gName').value.trim(),ph=$('gPhone').value.trim();

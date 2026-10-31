@@ -3,11 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#58060a">
-<title>غمرة دانتي</title>
-<meta property="og:title" content="دعوة خاصة — غمرة دانتي">
+<meta name="theme-color" content="#5f6a3a">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@700&family=Amiri:wght@400;700&display=swap">
+<title>غمرة دانة</title>
+<meta property="og:title" content="دعوة خاصة — غمرة دانة">
 <meta property="og:description" content="السبت 18/06/1448هـ الموافق 28/11/2026م — أكّدي حضوركِ واحصلي على بطاقة الدخول">
-<meta property="og:image" content="https://ab0jwad.github.io/gomrah/invite.jpg">
+<meta property="og:image" content="https://ab0jwad.github.io/gomrah/og.jpg">
 <style>
 :root{--burg:#58060a;--burg2:#7a1d22;--gold:#c9a36e;--cream:#f6eede;--olive:#6f7f4e;--ink:#2b1a14;--muted:#8a7360;--ok:#1f8a4c;--bad:#b3261e;--line:#e3d5bb;--card:#fffdf8}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -65,6 +67,42 @@ nav button.on{color:#fff;border-color:var(--gold);font-weight:700}
 .chip.in{background:#dff3e6;color:var(--ok)}.chip.cx{background:#fde8e6;color:var(--bad)}.chip.rm{background:#f3ead8;color:var(--muted)}
 .acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
 .acts a,.acts button{border:1px solid var(--line);background:var(--cream);border-radius:9px;padding:6px 10px;font:inherit;font-size:13px;color:var(--ink);text-decoration:none}
+/* ===== Yemeni guest page ===== */
+#guest{--fab:#66693f;--rose:#f1cbb9;--wine:#5a0a0e;--wine2:#7d1c22;--sand:#efe2c4;--silver:#e9e4d6;
+  background:#646a40 url(fabric.jpg) repeat;background-size:220px;color:var(--sand);min-height:100vh}
+#guest .stage{max-width:520px;margin:0 auto;position:relative;overflow:hidden}
+#guest .tent{display:block;width:100%;height:auto;margin-bottom:-40px;-webkit-mask-image:linear-gradient(#000 72%,transparent);mask-image:linear-gradient(#000 72%,transparent)}
+#guest .intro{text-align:center;padding:0 22px}
+#guest .title{font-family:"Aref Ruqaa",serif;font-size:58px;line-height:1.25;margin:0;color:var(--rose);letter-spacing:1px;
+  text-shadow:0 0 1px var(--wine),2px 2px 0 var(--wine),-2px 2px 0 var(--wine),2px -2px 0 var(--wine),-2px -2px 0 var(--wine),0 4px 10px rgba(0,0,0,.35)}
+#guest .verse{font-family:"Amiri",serif;font-size:30px;line-height:1.55;margin:8px 0 0;color:var(--sand);letter-spacing:3px}
+#guest .date{display:inline-block;font-family:"Aref Ruqaa",serif;font-size:30px;color:var(--rose);margin:14px 0 2px;padding-bottom:2px;border-bottom:2px solid var(--rose);
+  text-shadow:1px 1px 0 var(--wine),-1px 1px 0 var(--wine),1px -1px 0 var(--wine),-1px -1px 0 var(--wine)}
+#guest .hijri{font-family:"Amiri",serif;font-size:17px;color:var(--sand);opacity:.9;margin:4px 0 0}
+#guest .zig{height:16px;margin:26px auto 22px;max-width:300px;opacity:.95;
+  background:linear-gradient(135deg,var(--wine) 25%,transparent 25%) -8px 0/16px 16px,linear-gradient(225deg,var(--wine) 25%,transparent 25%) -8px 0/16px 16px,linear-gradient(315deg,#d9b25a 25%,transparent 25%) 0 0/16px 16px,linear-gradient(45deg,#d9b25a 25%,transparent 25%) 0 0/16px 16px}
+#guest .hostl{font-family:"Amiri",serif;font-size:24px;margin:0;color:var(--sand);letter-spacing:2px}
+#guest .host{font-family:"Aref Ruqaa",serif;font-size:36px;margin:2px 0 14px;color:var(--rose);
+  text-shadow:1.5px 1.5px 0 var(--wine),-1.5px 1.5px 0 var(--wine),1.5px -1.5px 0 var(--wine),-1.5px -1.5px 0 var(--wine)}
+#guest .poem{font-family:"Amiri",serif;font-size:18px;line-height:2;margin:0 auto 6px;max-width:30em;color:var(--sand)}
+#guest .loc{display:inline-block;margin-top:14px;color:var(--rose);font-family:"Amiri",serif;font-size:18px;text-decoration:none;border-bottom:1px dashed var(--rose)}
+#guest .bride{display:block;width:100%;height:auto;margin-top:0;-webkit-mask-image:linear-gradient(transparent,#000 22%,#000 88%,transparent);mask-image:linear-gradient(transparent,#000 22%,#000 88%,transparent)}
+#guest .wrap{padding-top:0;margin-top:-6px}
+#guest .box{background:#f7efdd;color:var(--ink);border:2px solid var(--wine);box-shadow:0 0 0 4px #f7efdd,0 0 0 6px #b8924f,0 10px 24px rgba(0,0,0,.25);margin:20px 6px 0}
+#guest .box .formt{font-family:"Aref Ruqaa",serif;color:var(--wine);font-size:26px;text-align:center;margin:0 0 4px}
+#guest .note{color:#7a6650}
+#guest #gCard .note,#guest #gCard .msg{background:#f7efdd}
+#guest #gCard{margin-top:18px}
+#guest .btn{background:var(--wine)}
+#guest .btn.sec{background:#f7efdd;color:var(--wine);border-color:var(--wine)}
+#guest .btn.ghost{background:#f7efdd}
+#guest .cardimg{border:3px solid #b8924f}
+#guest .foot{text-align:center;font-family:"Amiri",serif;color:var(--sand);opacity:.85;font-size:15px;margin:22px 0 4px}
+@media (prefers-reduced-motion:no-preference){
+  #guest .intro>*{animation:rise .9s ease-out both}
+  #guest .intro>*:nth-child(2){animation-delay:.15s}#guest .intro>*:nth-child(3){animation-delay:.3s}#guest .intro>*:nth-child(4){animation-delay:.4s}
+  @keyframes rise{from{opacity:.001;transform:translateY(10px)}to{opacity:1;transform:none}}
+}
 .toast{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;z-index:30}
 </style>
 </head>
@@ -72,14 +110,30 @@ nav button.on{color:#fff;border-color:var(--gold);font-weight:700}
 
 <!-- ============ GUEST ============ -->
 <div id="guest" hidden>
+  <img src="invite.jpg" alt="" id="heroImg" hidden>
+  <div class="stage">
+    <img class="tent" src="tent.jpg" alt="">
+    <div class="intro">
+      <h1 class="title">غمرة دانة</h1>
+      <p class="verse">ليلتك وانتي<br>قمرها</p>
+      <div><span class="date">28.11.26</span><p class="hijri">السبت 18 جمادى الآخرة 1448هـ</p></div>
+      <div>
+        <div class="zig" aria-hidden="true"></div>
+        <p class="hostl">حياكم الله بضيافة</p>
+        <p class="host">نجلاء النجدي</p>
+        <p class="poem">يا مرحبا ترحيبة كلها أطياب أزكي من العنبر وأطيب<br>من العود للي حضروا حفلنا أهل وأصحاب</p>
+        <p class="poem">بحضوركم زاد الفرح والهنا زاد</p>
+        <a class="loc" href="https://maps.app.goo.gl/qinSGP4HHEeGfou36" target="_blank" rel="noopener">📍 موقع القاعة</a>
+      </div>
+    </div>
+    <img class="bride" src="bride.jpg" alt="">
+  </div>
   <div class="wrap">
-    <img class="hero" src="invite.jpg" alt="دعوة خاصة — غمرة دانتي" id="heroImg">
-    <h1>غمرة دانتي</h1>
-    <p class="sub">يسعدنا حضوركِ يوم <b>السبت 18/06/1448هـ</b><br>الموافق <b>28/11/2026م</b></p>
 
 
     <!-- form -->
     <div class="box" id="gForm">
+      <p class="formt">تأكيد الحضور</p>
       <label for="gName">الاسم</label>
       <input id="gName" autocomplete="name" placeholder="مثال: أم محمد">
       <label for="gPhone">رقم الجوال</label>
@@ -112,6 +166,7 @@ nav button.on{color:#fff;border-color:var(--gold);font-weight:700}
       <p class="note" id="gDoneS"></p>
       <button class="btn sec" id="gBack" style="margin-top:12px">رجوع</button>
     </div>
+    <p class="foot">بانتظاركم 🤍</p>
   </div>
 </div>
 
@@ -12668,7 +12723,7 @@ $('gCancel').onclick=async e=>{const b=e.target;if(!twoTap(b,'متأكدة؟ ا�
 $('gBack').onclick=()=>gShow('gForm');
 let cardURL='';
 $('gSave').onclick=async()=>{
-  try{const blob=await (await fetch(cardURL)).blob();const file=new File([blob],'بطاقة_غمرة_دانتي.png',{type:'image/png'});
+  try{const blob=await (await fetch(cardURL)).blob();const file=new File([blob],'بطاقة_غمرة_دانة.png',{type:'image/png'});
     if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file]});return}
   }catch(e){if(e&&e.name==='AbortError')return}
   $('gSaveHelp').hidden=false;$('gCardImg').scrollIntoView({behavior:'smooth',block:'center'})};
@@ -12689,7 +12744,7 @@ $('q').oninput=()=>renderList();
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const showPh=p=>p&&p.startsWith('966')?'0'+p.slice(3):p;
 const fmtT=s=>{const d=new Date(s);return d.toLocaleDateString('ar-SA-u-ca-gregory',{day:'numeric',month:'numeric'})+' '+d.toLocaleTimeString('ar-SA',{hour:'2-digit',minute:'2-digit'})};
-function remindText(c){return 'حياكِ الله '+c.name+' 🌸\nنذكّركِ بمناسبة غمرة دانتي يوم السبت 18/06/1448هـ الموافق 28/11/2026م.\nبطاقة دخولكِ رقم '+pad(c.no)+(c.companions>0?(' (عدد الأشخاص '+(1+c.companions)+')'):'')+'، وتظهر لكِ من رابط الدعوة:\n'+GUEST_URL+'\n📍 موقع القاعة: '+MAPS+'\nوإذا لم تتمكني من الحضور، نرجو الإلغاء من نفس الرابط ليُتاح المقعد لغيركِ.'}
+function remindText(c){return 'حياكِ الله '+c.name+' 🌸\nنذكّركِ بمناسبة غمرة دانة يوم السبت 18/06/1448هـ الموافق 28/11/2026م.\nبطاقة دخولكِ رقم '+pad(c.no)+(c.companions>0?(' (عدد الأشخاص '+(1+c.companions)+')'):'')+'، وتظهر لكِ من رابط الدعوة:\n'+GUEST_URL+'\n📍 موقع القاعة: '+MAPS+'\nوإذا لم تتمكني من الحضور، نرجو الإلغاء من نفس الرابط ليُتاح المقعد لغيركِ.'}
 function filterCounts(){const C=data.cards,T=C.filter(c=>c.status==='taken');const n={taken:T.length,comp:T.filter(c=>c.companions>0).length,in:T.filter(c=>c.entered_at).length,wait:T.filter(c=>!c.entered_at).length,norem:T.filter(c=>!c.reminded_at&&!c.entered_at).length,rem:T.filter(c=>c.reminded_at).length,cx:C.filter(c=>c.status==='cancelled').length,dec:(data.declines||[]).length};
   document.querySelectorAll('#filters button').forEach(b=>{if(!b.dataset.l)b.dataset.l=b.textContent;b.textContent=b.dataset.l+' ('+(n[b.dataset.f]||0)+')'})}
 function renderList(){
@@ -12711,7 +12766,7 @@ $('rows').onclick=async e=>{const ln=e.target.closest('a[data-rem]');if(ln){rpc(
   try{if(b.dataset.a==='manual_in'){await checkin(null,+b.dataset.n);return}
     const r=await rpc('admin_action',{p_pin:PIN,p_action:b.dataset.a,p_no:+b.dataset.n});
     toast(r&&r.err==='full'?'لا يمكن: العدد مكتمل':'تم');load()}catch(err){toast('تعذّر الاتصال')}};
-const INV_DEFAULT='حياكم الله 🌸\nيسعدنا دعوتكم لحضور مناسبة غمرة دانتي\n📅 يوم السبت 18/06/1448هـ الموافق 28/11/2026م\n📍 موقع القاعة: '+MAPS+'\n\nلتأكيد الحضور أو الاعتذار واستلام بطاقة الدخول، افتحوا الرابط:\n'+GUEST_URL+'\n\nالعدد محدود، نرجو التأكيد مبكراً 🤍';
+const INV_DEFAULT='حياكم الله 🌸\nيسعدنا دعوتكم لحضور مناسبة غمرة دانة\n📅 يوم السبت 18/06/1448هـ الموافق 28/11/2026م\n📍 موقع القاعة: '+MAPS+'\n\nلتأكيد الحضور أو الاعتذار واستلام بطاقة الدخول، افتحوا الرابط:\n'+GUEST_URL+'\n\nالعدد محدود، نرجو التأكيد مبكراً 🤍';
 function invText(){let t=$('invTxt').value.trim()||INV_DEFAULT;if(!t.includes(GUEST_URL))t+='\n'+GUEST_URL;return t}
 function invSync(){$('waInv').href='https://wa.me/?text='+encodeURIComponent(invText())}
 $('invTxt').value=ls.get('inv_txt')||INV_DEFAULT;invSync();

@@ -179,6 +179,9 @@ nav button.on{color:#fff;border-color:var(--gold);font-weight:700}
 #guest .cdt{font-family:"Amiri",serif;font-size:19px;margin:0 0 8px;color:var(--sand)}
 #guest .cdg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;direction:rtl}
 #guest .cdg b{display:block;font-family:"Amiri",serif;font-size:36px;line-height:1.1;color:var(--rose);font-variant-numeric:tabular-nums}
+#guest .countdown.arrived{padding:22px 10px}
+#guest .countdown.arrived .cdt{font-family:"Aref Ruqaa",serif;font-size:40px;margin:0;color:var(--rose);text-shadow:1.5px 1.5px 0 #2a0305,-1.5px -1.5px 0 #2a0305}
+#guest .cds{font-family:"Amiri",serif;font-size:18px;margin:6px 0 0;color:var(--sand)}
 #guest .cdg span{font-size:13px;color:var(--sand);opacity:.9}
 #guest .rules{margin:14px 0 0;padding:10px 26px 10px 12px;background:#efe3c8;border-radius:10px;color:#5a0a0e;font-size:14px;line-height:1.9}
 .musicbtn{position:fixed;z-index:15;top:calc(12px + env(safe-area-inset-top,0px));left:calc(12px + env(safe-area-inset-left,0px));display:flex;align-items:center;gap:6px;height:42px;padding:0 12px;border-radius:21px;
@@ -12876,8 +12879,9 @@ async function gShowCard(r){
 }
 function gDone(t,s){$('gDoneT').textContent=t;$('gDoneS').textContent=s||'';gShow('gDone')}
 const EVENT_AT=new Date('2026-11-28T21:00:00+03:00').getTime();
-function tick(){let s=Math.max(0,Math.floor((EVENT_AT-Date.now())/1000));
-  if(s===0){$('countdown').querySelector('.cdt').textContent='الليلة موعدنا 🤍';}
+const PREVIEW_NIGHT=new URLSearchParams(location.search).get('preview')==='night';
+function tick(){let s=PREVIEW_NIGHT?0:Math.max(0,Math.floor((EVENT_AT-Date.now())/1000));
+  if(s===0){const c=$('countdown');if(!c.classList.contains('arrived')){c.classList.add('arrived');c.querySelector('.cdt').textContent='الليلة موعدنا 🤍';c.querySelector('.cdg').hidden=true;const sub=document.createElement('p');sub.className='cds';sub.textContent='حياكم الله، بانتظاركم في قاعة توت';c.appendChild(sub)}return}
   const d=Math.floor(s/86400);s%=86400;const h=Math.floor(s/3600);s%=3600;const m=Math.floor(s/60);s%=60;
   $('cdD').textContent=d;$('cdH').textContent=String(h).padStart(2,'0');$('cdM').textContent=String(m).padStart(2,'0');$('cdS').textContent=String(s).padStart(2,'0')}
 async function musicInit(){

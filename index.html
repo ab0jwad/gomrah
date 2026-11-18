@@ -13050,7 +13050,7 @@ const MODE=IS_ADMIN?'admin':'door';const PKEY=MODE==='admin'?'s_pin_admin':'s_pi
 let PIN=ls.get(PKEY)||'', data=null, stats=null, invData=null, linkData=null, view='door';
 function sView(v){view=v;document.querySelectorAll('#sNav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));['door','stats','inv','list','more'].forEach(k=>$('v-'+k).hidden=k!==v);if(v!=='door')stopCam();render()}
 document.querySelectorAll('#sNav button').forEach(b=>b.onclick=()=>sView(b.dataset.v));
-async function load(){if(!PIN)return;try{stats=await rpc('staff_stats',{p_pin:PIN});if(MODE==='admin'){data=await rpc('admin_list',{p_pin:PIN});invData=await rpc('admin_invites',{p_pin:PIN});linkData=await rpc('admin_links',{p_pin:PIN})}render()}catch(e){if(/bad_pin|locked|not_admin/.test(e.message)){ls.del(PKEY);PIN='';showPin(e.message==='locked'?'محاولات كثيرة، انتظري 10 دقائق':'الرقم السري غير صحيح')}}}
+async function load(){if(!PIN)return;try{stats=await rpc('staff_stats',{p_pin:PIN});if(MODE==='admin'){data=await rpc('admin_list',{p_pin:PIN});invData=await rpc('admin_invites',{p_pin:PIN});linkData=await rpc('admin_links',{p_pin:PIN});const sh=$('lRes').querySelector('[data-copy]');if(sh&&!linkData.some(x=>x.token===sh.dataset.copy))$('lRes').innerHTML=''}render()}catch(e){if(/bad_pin|locked|not_admin/.test(e.message)){ls.del(PKEY);PIN='';showPin(e.message==='locked'?'محاولات كثيرة، انتظري 10 دقائق':'الرقم السري غير صحيح')}}}
 function showPin(err){$('recBox').hidden=true;$('forgotBtn').hidden=MODE!=='admin';$('pinBox').hidden=false;$('sNav').hidden=true;['door','stats','inv','list','more'].forEach(k=>$('v-'+k).hidden=true);$('pinErr').textContent=err||'';$('pinErr').hidden=!err}
 $('pinBtn').onclick=async()=>{const p=$('pin').value.trim();try{await rpc(MODE==='admin'?'admin_action':'staff_stats',MODE==='admin'?{p_pin:p,p_action:'ping'}:{p_pin:p});PIN=p;ls.set(PKEY,p);$('pinBox').hidden=true;$('sNav').hidden=false;sView(view);load()}catch(e){showPin(e.message==='locked'?'محاولات كثيرة، انتظري 10 دقائق':e.message==='not_admin'?'هذا رقم الموظفة، ولا يفتح صفحة الإدارة':'الرقم السري غير صحيح')}};
 $('pin').onkeydown=e=>{if(e.key==='Enter')$('pinBtn').click()};
@@ -13106,11 +13106,17 @@ function linkInvite(l){let t=invText();const nm=(l.label||'').trim();
   const extra=['هذا الرابط خاص بكِ، يرجى عدم إرساله لغيركِ.'];if(l.max_comp>0)extra.unshift('💌 الدعوة لكِ ومعكِ '+compWord(l.max_comp)+'.');
   return t.replace(GUEST_URL,linkURL(l.token)+'\n'+extra.join('\n'))}
 function linkActs(l){return `<a class="btn" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(linkInvite(l))}"><svg class="ic" aria-hidden="true"><use href="#i-wa"/></svg> إرسال بالواتساب</a><div class="row2" style="margin-top:8px"><button class="btn sec" data-share="${l.token}">مشاركة</button><button class="btn sec" data-copy="${l.token}"><svg class="ic" aria-hidden="true"><use href="#i-copy"/></svg> نسخ</button></div>`}
-$('lMake').onclick=async()=>{const lab=$('lLabel').value.trim();
-  try{const r=await rpc('admin_link_create',{p_pin:PIN,p_label:lab,p_max:lComp});if(!r.ok){toast('تعذّر إنشاء الرابط');return}
+let lBusy=false,lPendTok=null,lPendKey='';
+function newTok(){const A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';const u=new Uint32Array(7);crypto.getRandomValues(u);return Array.from(u,x=>A[x%A.length]).join('')}
+$('lMake').onclick=async e=>{if(lBusy)return;const lab=$('lLabel').value.trim();
+  if(lab&&(linkData||[]).some(x=>!x.revoked&&!x.used_at&&(x.label||'').trim()===lab)&&!twoTap(e.currentTarget,'يوجد رابط لم يُفتح بنفس الاسم — اضغطي مرة أخرى لإنشاء رابط جديد'))return;
+  const key=lab+'|'+lComp;if(!lPendTok||lPendKey!==key){lPendTok=newTok();lPendKey=key}
+  lBusy=true;$('lMake').disabled=true;
+  try{const r=await rpc('admin_link_create2',{p_pin:PIN,p_label:lab,p_max:lComp,p_token:lPendTok});if(!r.ok){toast('تعذّر إنشاء الرابط');return}
+    lPendTok=null;
     const l={token:r.token,label:lab,max_comp:lComp};lastLinks[r.token]=l;
     $('lRes').innerHTML=`<div class="msg ok">جاهز${lab?' لـ'+esc(lab):''}${lComp>0?' — مع '+compWord(lComp):''}. اختاري الضيفة في الواتساب وأرسلي.</div>`+linkActs(l);
-    $('lLabel').value='';setLComp(0);load()}catch(e){toast('تعذّر الاتصال')}};
+    $('lLabel').value='';setLComp(0);load()}catch(e){toast('تعذّر الاتصال')}finally{lBusy=false;$('lMake').disabled=false}};
 const lastLinks={};
 function findLink(tk){return lastLinks[tk]||((linkData||[]).find(x=>x.token===tk))}
 async function shareOrCopy(tk,share){const l=findLink(tk);if(!l)return;const txt=linkInvite(l);
@@ -13212,7 +13218,7 @@ $('aBtn').onclick=async()=>{const nm=$('aName').value.trim(),ph=$('aPhone').valu
   try{const r=await rpc('admin_action',{p_pin:PIN,p_action:'add',p_name:nm,p_phone:ph});
     if(r.ok){const c={no:r.no,name:r.name,phone:normPhone(ph)};$('aRes').innerHTML=`<div class="msg ok">أُضيفت ${esc(r.name)} برقم ${pad(r.no)}${r.existing?' (موجودة مسبقاً)':''}</div><a class="btn sec" style="margin-top:8px" target="_blank" rel="noopener" href="https://wa.me/${c.phone}?text=${encodeURIComponent(remindText(c))}">إرسال الرابط لها في الواتساب</a>`;$('aName').value='';$('aPhone').value='';load()}
     else $('aRes').innerHTML=`<div class="msg err">${r.err==='full'?'اكتمل العدد':'تأكدي من البيانات'}</div>`}catch(e){toast('تعذّر الاتصال')}};
-$('resetBtn').onclick=async e=>{if(!twoTap(e.target,'متأكد؟ اضغط مرة أخرى للتصفير الكامل'))return;try{await rpc('admin_action',{p_pin:PIN,p_action:'reset_all'});toast('تم التصفير');load()}catch(err){toast('تعذّر الاتصال')}};
+$('resetBtn').onclick=async e=>{if(!twoTap(e.target,'متأكد؟ اضغط مرة أخرى للتصفير الكامل'))return;try{await rpc('admin_action',{p_pin:PIN,p_action:'reset_all'});$('lRes').innerHTML='';for(const k in lastLinks)delete lastLinks[k];lPendTok=null;$('lLabel').value='';toast('تم التصفير');load()}catch(err){toast('تعذّر الاتصال')}};
 $('logout').onclick=()=>{ls.del(PKEY);PIN='';showPin()};
 $('myBtn').onclick=async()=>{const n=$('myNew').value.trim(),n2=$('myNew2').value.trim();
   if(!/^[0-9]{4,8}$/.test(n)){toast('اكتبي من 4 إلى 8 أرقام');return}if(n!==n2){toast('الرقمان غير متطابقين');return}

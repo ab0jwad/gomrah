@@ -494,14 +494,15 @@ details.more .item{margin:0 0 10px}
         <div class="manual"><input id="spIn" inputmode="numeric" maxlength="8" placeholder="رقم جديد" dir="ltr"><button class="btn" id="spBtn">حفظ</button></div>
       </div>
       <div class="box">
-        <h3 style="margin:0 0 6px;color:var(--burg)">رسالة الدعوة</h3>
-        <p class="note">عدّل النص كما تحب. عند النسخ يُنسخ النص مع الرابط جاهزاً للإرسال.</p>
+        <h3 style="margin:0 0 6px;color:var(--burg)">نص رسالة الدعوة</h3>
+        <p class="note">هنا تعدّلين نص الرسالة فقط. الإرسال يكون من تبويب <b>«الدعوات» ← «إنشاء رابط الدعوة»</b>، فيُضاف لكل ضيفة رابطها الخاص تلقائياً مكان الرابط.</p>
         <textarea id="invTxt" rows="9" style="width:100%;font:inherit;font-size:15px;line-height:1.8;padding:12px;border-radius:12px;border:2px solid var(--line);background:#fff;color:var(--ink);margin-top:8px"></textarea>
-        <div class="row2">
+        <div class="row2" hidden>
           <button class="btn" id="copyInv"><svg class="ic" aria-hidden="true"><use href="#i-copy"/></svg> نسخ الدعوة</button>
           <a class="btn sec" id="waInv" target="_blank" rel="noopener"><svg class="ic" aria-hidden="true"><use href="#i-wa"/></svg> إرسال واتساب</a>
         </div>
         <button class="btn sec" id="resetInv" style="margin-top:10px;font-size:14px;padding:10px">إرجاع النص الأصلي</button>
+        <button class="btn" id="goInv" style="margin-top:10px">الذهاب إلى «الدعوات» للإرسال</button>
       </div>
       <div class="box">
         <h3 style="margin:0 0 6px;color:var(--burg)">إضافة ضيفة يدوياً</h3>
@@ -13199,6 +13200,7 @@ function invText(){let t=$('invTxt').value.trim()||INV_DEFAULT;if(!t.includes(GU
 function invSync(){$('waInv').href='https://wa.me/?text='+encodeURIComponent(invText())}
 $('invTxt').value=ls.get('inv_txt')||INV_DEFAULT;invSync();
 $('invTxt').oninput=()=>{ls.set('inv_txt',$('invTxt').value);invSync()};
+$('goInv').onclick=()=>{sView('inv');window.scrollTo({top:0,behavior:'smooth'})};
 $('resetInv').onclick=()=>{$('invTxt').value=INV_DEFAULT;ls.del('inv_txt');invSync();toast('رجع النص الأصلي')};
 $('copyInv').onclick=async()=>{const t=invText();try{await navigator.clipboard.writeText(t);toast('نُسخت الدعوة مع الرابط')}catch(e){$('invTxt').focus();$('invTxt').select();toast('انسخ النص المحدد')}};
 $('capBtn').onclick=async()=>{const n=parseInt($('capIn').value,10);if(!(n>0)){toast('اكتب رقماً صحيحاً');return}

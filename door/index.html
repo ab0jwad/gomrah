@@ -12875,10 +12875,10 @@ async function renderCard(no,code,name,comp){
   const q=qrcode(0,'M');q.addData(code);q.make();const n=q.getModuleCount(),qs=320,m=2,cell=qs/(n+2*m);
   x.fillStyle='#fff';x.fillRect(cx-qs/2,y0+66,qs,qs);x.fillStyle='#280004';
   for(let r=0;r<n;r++)for(let k=0;k<n;k++)if(q.isDark(r,k))x.fillRect(Math.floor(cx-qs/2+(k+m)*cell),Math.floor(y0+66+(r+m)*cell),Math.ceil(cell),Math.ceil(cell));
-  x.fillStyle='#58060a';x.font='700 30px -apple-system,Tahoma,sans-serif';x.fillText('رقم البطاقة: '+pad(no),cx,y0+410);
-  x.font='600 24px -apple-system,Tahoma,sans-serif';let nm='المكرمة: '+name;while(x.measureText(nm).width>340&&nm.length>8)nm=nm.slice(0,-1);x.fillText(nm,cx,y0+440);
-  if(comp>0){x.fillStyle='#1f6b3a';x.font='700 22px -apple-system,Tahoma,sans-serif';x.fillText(comp===1?'+ مرافقة واحدة':('+ '+comp+' مرافقات'),cx,y0+469)}
-  else{x.fillStyle='#96704a';x.font='20px -apple-system,Tahoma,sans-serif';x.fillText('شخصية · تُستخدم مرة واحدة',cx,y0+469)}
+  x.fillStyle='#58060a';
+  x.font='700 27px -apple-system,Tahoma,sans-serif';let nm='المكرمة: '+name;while(x.measureText(nm).width>340&&nm.length>8)nm=nm.slice(0,-1);x.fillText(nm,cx,y0+418);
+  if(comp>0){x.fillStyle='#1f6b3a';x.font='700 22px -apple-system,Tahoma,sans-serif';x.fillText(comp===1?'+ مرافقة واحدة':('+ '+comp+' مرافقات'),cx,y0+458)}
+  else{x.fillStyle='#96704a';x.font='20px -apple-system,Tahoma,sans-serif';x.fillText('شخصية · تُستخدم مرة واحدة',cx,y0+458)}
   return c.toDataURL('image/png');
 }
 async function gShowCard(r){
@@ -12966,7 +12966,7 @@ $('q').oninput=()=>renderList();
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const showPh=p=>p&&p.startsWith('966')?'0'+p.slice(3):p;
 const fmtT=s=>{const d=new Date(s);return d.toLocaleDateString('ar-SA-u-ca-gregory',{day:'numeric',month:'numeric'})+' '+d.toLocaleTimeString('ar-SA',{hour:'2-digit',minute:'2-digit'})};
-function remindText(c){return 'حياكِ الله '+c.name+' 🌸\nنذكّركِ بمناسبة غمرة دانة يوم السبت 18/06/1448هـ الموافق 28/11/2026م.\nبطاقة دخولكِ رقم '+pad(c.no)+(c.companions>0?(' (عدد الأشخاص '+(1+c.companions)+')'):'')+'، وتظهر لكِ من رابط الدعوة:\n'+GUEST_URL+'\n📍 موقع القاعة: '+MAPS+'\nوإذا لم تتمكني من الحضور، نرجو الإلغاء من نفس الرابط ليُتاح المقعد لغيركِ.'}
+function remindText(c){return 'حياكِ الله '+c.name+' 🌸\nنذكّركِ بمناسبة غمرة دانة يوم السبت 18/06/1448هـ الموافق 28/11/2026م.\nبطاقة دخولكِ'+(c.companions>0?(' (عدد الأشخاص '+(1+c.companions)+')'):'')+' تظهر لكِ من رابط الدعوة:\n'+GUEST_URL+'\n📍 موقع القاعة: '+MAPS+'\nوإذا لم تتمكني من الحضور، نرجو الإلغاء من نفس الرابط ليُتاح المقعد لغيركِ.'}
 function filterCounts(){const C=data.cards,T=C.filter(c=>c.status==='taken');const n={taken:T.length,comp:T.filter(c=>c.companions>0).length,in:T.filter(c=>c.entered_at).length,wait:T.filter(c=>!c.entered_at).length,norem:T.filter(c=>!c.reminded_at&&!c.entered_at).length,rem:T.filter(c=>c.reminded_at).length,cx:C.filter(c=>c.status==='cancelled').length,dec:(data.declines||[]).length};
   document.querySelectorAll('#filters button').forEach(b=>{if(!b.dataset.l)b.dataset.l=b.textContent;b.textContent=b.dataset.l+' ('+(n[b.dataset.f]||0)+')'})}
 function renderList(){

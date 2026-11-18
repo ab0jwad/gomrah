@@ -12986,7 +12986,7 @@ $('rows').onclick=async e=>{const ln=e.target.closest('a[data-rem]');if(ln){rpc(
   try{if(b.dataset.a==='manual_in'){await checkin(null,+b.dataset.n);return}
     const r=await rpc('admin_action',{p_pin:PIN,p_action:b.dataset.a,p_no:+b.dataset.n});
     toast(r&&r.err==='full'?'لا يمكن: العدد مكتمل':'تم');load()}catch(err){toast('تعذّر الاتصال')}};
-const INV_DEFAULT='حياكم الله 🌸\nيسعدنا دعوتكم لحضور مناسبة غمرة دانة\n📅 يوم السبت 18/06/1448هـ الموافق 28/11/2026م\n📍 موقع القاعة: '+MAPS+'\n\nلتأكيد الحضور أو الاعتذار واستلام بطاقة الدخول، افتحوا الرابط:\n'+GUEST_URL+'\n\nالعدد محدود، نرجو التأكيد مبكراً 🤍';
+const INV_DEFAULT='حياكم الله 🌸\nيسعدنا دعوتكم لحضور مناسبة غمرة دانة\n📅 يوم السبت 18/06/1448هـ الموافق 28/11/2026م\n📍 موقع القاعة: '+MAPS+'\n\nلتأكيد الحضور أو الاعتذار واستلام بطاقة الدخول، افتحوا الرابط:\n'+GUEST_URL+'\n\nنرجو التأكيد مبكراً 🤍';
 function invText(){let t=$('invTxt').value.trim()||INV_DEFAULT;if(!t.includes(GUEST_URL))t+='\n'+GUEST_URL;return t}
 function invSync(){$('waInv').href='https://wa.me/?text='+encodeURIComponent(invText())}
 $('invTxt').value=ls.get('inv_txt')||INV_DEFAULT;invSync();

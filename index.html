@@ -215,6 +215,9 @@ nav button.on{color:#fff;border-color:var(--gold);font-weight:700}
 .chk{display:flex;align-items:center;gap:10px;font-weight:700;color:#5a0a0e;font-size:17px;margin:0}
 .chk input{width:22px;height:22px;accent-color:#5a0a0e}
 #staff nav button{font-size:16px;padding:10px 2px}
+#guest.locked .intro>*:not(.title),#guest.locked .timeline,#guest.locked .countdown,#guest.locked .loc,#guest.locked #gForm,#guest.locked #gCard,#guest.locked #gDone{display:none!important}
+details.more{padding:12px 14px}details.more summary{cursor:pointer;font-weight:700;color:#5a0a0e;font-size:16px}
+details.more .item{margin:0 0 10px}
 .toast{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;z-index:30}
 </style>
 </head>
@@ -287,7 +290,10 @@ nav button.on{color:#fff;border-color:var(--gold);font-weight:700}
     <img class="bride" src="bride.jpg" alt="">
   </div>
   <div class="wrap">
-
+    <div class="box center" id="gLocked" hidden>
+      <p class="formt">دعوة خاصة</p>
+      <p id="gLockedT" style="line-height:1.9;margin:6px 0 0;color:#5a0a0e"></p>
+    </div>
 
     <!-- form -->
     <div class="box" id="gForm">
@@ -402,7 +408,31 @@ nav button.on{color:#fff;border-color:var(--gold);font-weight:700}
     </section>
     <section id="v-inv" hidden>
       <div class="box">
-        <h3 style="margin:0 0 6px;color:var(--burg)">إضافة مدعوة</h3>
+        <h3 style="margin:0 0 6px;color:var(--burg)">إرسال دعوة</h3>
+        <p class="note">كل ضغطة تُنشئ رابطاً خاصاً لضيفة واحدة. يُستخدم من جوال واحد فقط، فإذا أُعيد إرساله لغيرها لا يفتح.</p>
+        <label for="lLabel">اسم الضيفة (اختياري، لتعرفيها في القائمة)</label><input id="lLabel" autocomplete="off">
+        <label>عدد المرافقين المسموح</label>
+        <div class="ce small"><button id="lCompMinus" type="button">−</button><b id="lCompN">0</b><button id="lCompPlus" type="button">+</button></div>
+        <button class="btn" id="lMake" style="margin-top:12px"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg> إنشاء رابط الدعوة</button>
+        <div id="lRes"></div>
+      </div>
+      <div class="box" id="iModeBox2">
+        <label class="chk"><input type="checkbox" id="iOnly"> الدعوة للمدعوين فقط</label>
+        <p class="note" id="iOnlyNote"></p>
+      </div>
+      <input id="lq" placeholder="ابحث بالاسم أو الجوال" style="margin-top:16px">
+      <div class="filters" id="lfilters">
+        <button data-f="all" class="on">الكل</button>
+        <button data-f="new">لم تُفتح بعد</button>
+        <button data-f="yes">أكّدت</button>
+        <button data-f="cx">ألغت</button>
+        <button data-f="rev">روابط موقوفة</button>
+      </div>
+      <div id="lrows"></div>
+      <details class="box more">
+        <summary>طريقة أخرى: الإضافة برقم الجوال</summary>
+      <div>
+        <h3 style="margin:10px 0 6px;color:var(--burg)">إضافة مدعوة</h3>
         <label for="iName">الاسم</label><input id="iName" autocomplete="off">
         <label for="iPhone">رقم الجوال</label><input id="iPhone" inputmode="tel" dir="ltr" placeholder="05xxxxxxxx">
         <label for="iComp">عدد المرافقين المسموح</label>
@@ -410,16 +440,12 @@ nav button.on{color:#fff;border-color:var(--gold);font-weight:700}
         <button class="btn" id="iAdd" style="margin-top:12px"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg> إضافة</button>
         <div id="iRes"></div>
       </div>
-      <div class="box">
-        <h3 style="margin:0 0 6px;color:var(--burg)">إضافة قائمة دفعة واحدة</h3>
+      <div>
+        <h3 style="margin:18px 0 6px;color:var(--burg)">إضافة قائمة دفعة واحدة</h3>
         <p class="note">كل مدعوة في سطر: الاسم، الجوال، عدد المرافقين (اختياري). مثال:<br><span dir="ltr">أم محمد، 0551234567، 2</span></p>
         <textarea id="iBulk" rows="5" style="width:100%;font:inherit;font-size:15px;padding:10px;border-radius:12px;border:2px solid var(--line);background:#fff;color:var(--ink);margin-top:8px"></textarea>
         <button class="btn sec" id="iBulkBtn" style="margin-top:10px">إضافة الكل</button>
         <div id="iBulkRes"></div>
-      </div>
-      <div class="box" id="iModeBox">
-        <label class="chk"><input type="checkbox" id="iOnly"> الدعوة للمدعوين فقط</label>
-        <p class="note" id="iOnlyNote"></p>
       </div>
       <input id="iq" placeholder="ابحث بالاسم أو الجوال" style="margin-top:16px">
       <div class="filters" id="ifilters">
@@ -430,6 +456,7 @@ nav button.on{color:#fff;border-color:var(--gold);font-weight:700}
         <button data-f="no">اعتذرت</button>
       </div>
       <div id="irows"></div>
+      </details>
     </section>
     <section id="v-list" hidden>
       <input id="q" placeholder="ابحث بالاسم أو الجوال أو رقم البطاقة">
@@ -12965,8 +12992,17 @@ async function musicInit(){
   b.onclick=e=>{e.stopPropagation();if(a.paused){userPaused=false;a.play().catch(()=>{})}else{userPaused=true;a.pause()}};
   document.addEventListener('visibilitychange',()=>{if(document.hidden)a.pause();else if(!userPaused)start()});
 }
+const URL_TOK=(new URLSearchParams(location.search).get('i')||'').trim().toUpperCase();
+if(URL_TOK)ls.set('g_tok',URL_TOK);
+const TOKEN=URL_TOK||ls.get('g_tok')||'';
+const LOCK_MSG={private:'هذه الدعوة خاصة بالمدعوين. افتحي الرابط الذي وصلكِ من صاحبة الدعوة.',
+  used:'هذا الرابط استُخدم من جوال آخر. إذا كانت الدعوة لكِ، تواصلي مع صاحبة الدعوة لترسل لكِ رابطاً جديداً.',
+  bad_link:'هذا الرابط غير صالح أو أُلغي. تواصلي مع صاحبة الدعوة.'};
 async function guestInit(){
-  $('guest').hidden=false;tick();setInterval(tick,1000);musicInit();$('gName').value=gName;$('gPhone').value=gPhone;
+  $('guest').hidden=false;tick();setInterval(tick,1000);$('gName').value=gName;$('gPhone').value=gPhone;
+  let gate=null;try{gate=await rpc('guest_gate',{p_token:TOKEN||null,p_device:gDev})}catch(e){gate=null}
+  if(gate&&!gate.open){$('guest').classList.add('locked');$('gLocked').hidden=false;$('gLockedT').textContent=LOCK_MSG[gate.why]||LOCK_MSG.private;return}
+  musicInit();
   if(gPhone){try{const r=await rpc('guest_my_card2',{p_phone:gPhone,p_device:gDev});if(r.ok){r.existing=true;await gShowCard(r)}}catch(e){}}
 }
 function gRead(needName){const nm=$('gName').value.trim(),ph=$('gPhone').value.trim();
@@ -12975,10 +13011,12 @@ function gRead(needName){const nm=$('gName').value.trim(),ph=$('gPhone').value.t
   gErr('');return{nm,ph}}
 const NOT_INV='عذراً، هذه الدعوة خاصة بالمدعوين. اكتبي رقم الجوال نفسه الذي وصلتكِ عليه الدعوة، أو تواصلي مع صاحبة الدعوة.';
 async function gClaim(comp){const v=gRead(true);if(!v)return;const b=$('gYes');b.disabled=true;
-  try{const r=await rpc('guest_claim2',{p_name:v.nm,p_phone:v.ph,p_device:gDev,p_comp:comp});
+  try{const r=await rpc('guest_claim3',{p_name:v.nm,p_phone:v.ph,p_device:gDev,p_comp:comp,p_token:TOKEN||null});
     if(r.ok){$('gPick').hidden=true;if(!r.same_device){gPhone=v.ph;gName=v.nm;ls.set('g_phone',v.ph);ls.set('g_name',v.nm)}else{gName=r.name;ls.set('g_name',r.name)}await gShowCard(r)}
     else if(r.err==='choose_comp')showPick(r.max);
     else if(r.err==='not_invited'){$('gPick').hidden=true;gErr(NOT_INV)}
+    else if(r.err==='link_used'){$('gPick').hidden=true;gErr(LOCK_MSG.used)}
+    else if(r.err==='bad_link'){$('gPick').hidden=true;gErr(LOCK_MSG.bad_link)}
     else if(r.err==='other_device')gErr(OTHER_DEV);
     else if(r.err==='full'){if(comp>0&&r.left>0){gErr('بقي '+r.left+(r.left===1?' مقعد':' مقاعد')+' فقط. اختاري عدداً أقل من المرافقات.')}else{$('gPick').hidden=true;gDone('نعتذر، اكتمل العدد','شكراً لكِ، ونتمنى رؤيتكِ في مناسبة قادمة.')}}
     else gErr('تأكدي من الاسم ورقم الجوال');
@@ -13008,10 +13046,10 @@ $('gSave').onclick=async()=>{
 const HASH=(()=>{try{return decodeURIComponent(location.hash.replace('#',''))}catch(e){return location.hash.replace('#','')}})();
 const IS_ADMIN=['um','admin','أم-العروسة','ام-العروسة','أم_العروسة','ام_العروسة'].includes(HASH);
 const MODE=IS_ADMIN?'admin':'door';const PKEY=MODE==='admin'?'s_pin_admin':'s_pin_door';
-let PIN=ls.get(PKEY)||'', data=null, stats=null, invData=null, view='door';
+let PIN=ls.get(PKEY)||'', data=null, stats=null, invData=null, linkData=null, view='door';
 function sView(v){view=v;document.querySelectorAll('#sNav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));['door','stats','inv','list','more'].forEach(k=>$('v-'+k).hidden=k!==v);if(v!=='door')stopCam();render()}
 document.querySelectorAll('#sNav button').forEach(b=>b.onclick=()=>sView(b.dataset.v));
-async function load(){if(!PIN)return;try{stats=await rpc('staff_stats',{p_pin:PIN});if(MODE==='admin'){data=await rpc('admin_list',{p_pin:PIN});invData=await rpc('admin_invites',{p_pin:PIN})}render()}catch(e){if(/bad_pin|locked|not_admin/.test(e.message)){ls.del(PKEY);PIN='';showPin(e.message==='locked'?'محاولات كثيرة، انتظري 10 دقائق':'الرقم السري غير صحيح')}}}
+async function load(){if(!PIN)return;try{stats=await rpc('staff_stats',{p_pin:PIN});if(MODE==='admin'){data=await rpc('admin_list',{p_pin:PIN});invData=await rpc('admin_invites',{p_pin:PIN});linkData=await rpc('admin_links',{p_pin:PIN})}render()}catch(e){if(/bad_pin|locked|not_admin/.test(e.message)){ls.del(PKEY);PIN='';showPin(e.message==='locked'?'محاولات كثيرة، انتظري 10 دقائق':'الرقم السري غير صحيح')}}}
 function showPin(err){$('recBox').hidden=true;$('forgotBtn').hidden=MODE!=='admin';$('pinBox').hidden=false;$('sNav').hidden=true;['door','stats','inv','list','more'].forEach(k=>$('v-'+k).hidden=true);$('pinErr').textContent=err||'';$('pinErr').hidden=!err}
 $('pinBtn').onclick=async()=>{const p=$('pin').value.trim();try{await rpc(MODE==='admin'?'admin_action':'staff_stats',MODE==='admin'?{p_pin:p,p_action:'ping'}:{p_pin:p});PIN=p;ls.set(PKEY,p);$('pinBox').hidden=true;$('sNav').hidden=false;sView(view);load()}catch(e){showPin(e.message==='locked'?'محاولات كثيرة، انتظري 10 دقائق':e.message==='not_admin'?'هذا رقم الموظفة، ولا يفتح صفحة الإدارة':'الرقم السري غير صحيح')}};
 $('pin').onkeydown=e=>{if(e.key==='Enter')$('pinBtn').click()};
@@ -13029,7 +13067,7 @@ function render(){
     $('sHdr').textContent='دخل '+s.in_persons+' · مؤكد '+s.persons+' / '+s.capacity+' شخصاً';
     const set=(id,v)=>{$(id).textContent=v};set('st_persons',s.persons);set('st_in',s.in_persons);set('st_wait',s.wait_persons);set('st_cards',s.cards);set('st_compc',s.comp_cards);set('st_comp',s.companions);set('st_cx',s.cancelled);set('st_dec',s.declines);set('st_cap',s.capacity);set('st_left',Math.max(0,s.capacity-s.persons));
     $('capInfo').textContent='العدد الحالي: '+s.capacity+' شخصاً — المؤكدون الآن: '+s.persons+' — المتبقي: '+Math.max(0,s.capacity-s.persons)}
-  if(MODE==='admin'&&data&&view==='list')renderList();if(MODE==='admin'&&invData&&view==='inv')renderInv()}
+  if(MODE==='admin'&&data&&view==='list')renderList();if(MODE==='admin'&&invData&&view==='inv'){renderInv();if(linkData)renderLinks()}}
 let filt='taken';
 document.querySelectorAll('#filters button').forEach(b=>b.onclick=()=>{filt=b.dataset.f;document.querySelectorAll('#filters button').forEach(x=>x.classList.toggle('on',x===b));renderList()});
 $('q').oninput=()=>renderList();
@@ -13058,7 +13096,52 @@ $('rows').onclick=async e=>{const ln=e.target.closest('a[data-rem]');if(ln){rpc(
   try{if(b.dataset.a==='manual_in'){await checkin(null,+b.dataset.n);return}
     const r=await rpc('admin_action',{p_pin:PIN,p_action:b.dataset.a,p_no:+b.dataset.n});
     toast(r&&r.err==='full'?'لا يمكن: العدد مكتمل':'تم');load()}catch(err){toast('تعذّر الاتصال')}};
-function invPhones(){return new Set(((invData&&invData.invites)||[]).map(i=>i.phone))}
+function invPhones(){const s=new Set(((invData&&invData.invites)||[]).map(i=>i.phone));((linkData)||[]).forEach(l=>{if(l.used_phone)s.add(l.used_phone)});return s}
+let lComp=0;const setLComp=n=>{lComp=Math.max(0,Math.min(20,n));$('lCompN').textContent=lComp};
+$('lCompMinus').onclick=()=>setLComp(lComp-1);$('lCompPlus').onclick=()=>setLComp(lComp+1);
+function linkURL(tk){return GUEST_URL+'?i='+tk}
+function linkInvite(l){let t=invText();const nm=(l.label||'').trim();
+  if(nm)t=t.replace(/^حياكم الله 🌸/,'حياكِ الله '+nm+' 🌸');
+  const extra=['هذا الرابط خاص بكِ، يرجى عدم إرساله لغيركِ.'];if(l.max_comp>0)extra.unshift('💌 الدعوة لكِ ومعكِ '+compWord(l.max_comp)+'.');
+  return t.replace(GUEST_URL,linkURL(l.token)+'\n'+extra.join('\n'))}
+function linkActs(l){return `<a class="btn" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(linkInvite(l))}"><svg class="ic" aria-hidden="true"><use href="#i-wa"/></svg> إرسال بالواتساب</a><div class="row2" style="margin-top:8px"><button class="btn sec" data-share="${l.token}">مشاركة</button><button class="btn sec" data-copy="${l.token}"><svg class="ic" aria-hidden="true"><use href="#i-copy"/></svg> نسخ</button></div>`}
+$('lMake').onclick=async()=>{const lab=$('lLabel').value.trim();
+  try{const r=await rpc('admin_link_create',{p_pin:PIN,p_label:lab,p_max:lComp});if(!r.ok){toast('تعذّر إنشاء الرابط');return}
+    const l={token:r.token,label:lab,max_comp:lComp};lastLinks[r.token]=l;
+    $('lRes').innerHTML=`<div class="msg ok">جاهز${lab?' لـ'+esc(lab):''}${lComp>0?' — مع '+compWord(lComp):''}. اختاري الضيفة في الواتساب وأرسلي.</div>`+linkActs(l);
+    $('lLabel').value='';setLComp(0);load()}catch(e){toast('تعذّر الاتصال')}};
+const lastLinks={};
+function findLink(tk){return lastLinks[tk]||((linkData||[]).find(x=>x.token===tk))}
+async function shareOrCopy(tk,share){const l=findLink(tk);if(!l)return;const txt=linkInvite(l);
+  if(share&&navigator.share){try{await navigator.share({text:txt});return}catch(e){if(e&&e.name==='AbortError')return}}
+  try{await navigator.clipboard.writeText(txt);toast('نُسخت الدعوة مع الرابط الخاص')}catch(e){toast('تعذّر النسخ')}}
+document.addEventListener('click',e=>{const s=e.target.closest('[data-share]');if(s){shareOrCopy(s.dataset.share,true);return}const c=e.target.closest('[data-copy]');if(c)shareOrCopy(c.dataset.copy,false)});
+let lfilt='all';
+document.querySelectorAll('#lfilters button').forEach(b=>b.onclick=()=>{lfilt=b.dataset.f;document.querySelectorAll('#lfilters button').forEach(x=>x.classList.toggle('on',x===b));renderLinks()});
+$('lq').oninput=()=>renderLinks();
+function linkState(l){return l.revoked?'rev':l.card_status==='taken'?'yes':l.card_status==='cancelled'?'cx':'new'}
+function renderLinks(){const L=linkData||[];const n={all:L.length,new:0,yes:0,cx:0,rev:0};L.forEach(l=>n[linkState(l)]++);
+  document.querySelectorAll('#lfilters button').forEach(b=>{if(!b.dataset.l)b.dataset.l=b.textContent;b.textContent=b.dataset.l+' ('+(n[b.dataset.f]||0)+')'});
+  const q=$('lq').value.trim();
+  const items=L.filter(l=>(lfilt==='all'||linkState(l)===lfilt)&&(!q||(l.label||'').includes(q)||(l.card_name||'').includes(q)||(l.used_phone||'').includes(normPhone(q)||'@')));
+  $('lrows').innerHTML=items.map(l=>{const st=linkState(l);const ch=[];
+    ch.push(l.max_comp>0?`<span class="chip in" style="background:#eef0e4;color:#55623a">مسموح ${l.max_comp} مرافق</span>`:'<span class="chip">بدون مرافقين</span>');
+    if(st==='yes')ch.push(`<span class="chip in">أكّدت: ${esc(l.card_name)}${l.card_comp>0?' مع '+l.card_comp:''}${l.entered?' · دخلت':''}</span>`);
+    else if(st==='cx')ch.push(`<span class="chip cx">ألغت: ${esc(l.card_name||'')}</span>`);
+    else if(st==='rev')ch.push('<span class="chip cx">الرابط موقوف</span>');
+    else ch.push('<span class="chip" style="background:#fff4e0;color:#9a5b00">لم تُفتح بعد</span>');
+    const a=[];
+    if(st==='new'||st==='yes'){a.push(`<a target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(linkInvite(l))}"><svg class="ic" aria-hidden="true"><use href="#i-wa"/></svg> إرسال</a>`,`<button data-copy="${l.token}"><svg class="ic" aria-hidden="true"><use href="#i-copy"/></svg> نسخ</button>`)}
+    if(st!=='rev'){a.push(`<button data-la="dec" data-t="${l.token}" data-m="${l.max_comp}" data-q="1"><svg class="ic" aria-hidden="true"><use href="#i-minus"/></svg> مرافق</button>`,`<button data-la="inc" data-t="${l.token}" data-m="${l.max_comp}" data-q="1"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg> مرافق</button>`)}
+    if(st==='new')a.push(`<button data-la="revoke" data-t="${l.token}"><svg class="ic" aria-hidden="true"><use href="#i-cancel"/></svg> إيقاف الرابط</button>`);
+    if(st==='rev')a.push(`<button data-la="restore" data-t="${l.token}" data-q="1"><svg class="ic" aria-hidden="true"><use href="#i-undo"/></svg> إعادة تفعيل</button>`);
+    const title=esc(l.label||l.card_name||'دعوة بدون اسم');const ph=l.used_phone?`<span class="ph">${esc(showPh(l.used_phone))}</span>`:'';
+    return `<div class="item"><div class="h"><span class="nm">${title}</span>${ph}${ch.join('')}</div><div class="acts">${a.join('')}</div></div>`}).join('')||'<p class="note" style="color:var(--sand)">لم تُرسل أي دعوة بعد. اضغطي «إنشاء رابط الدعوة» في الأعلى.</p>'}
+$('lrows').onclick=async e=>{const b=e.target.closest('button[data-la]');if(!b)return;const act=b.dataset.la;
+  if(!b.dataset.q&&!twoTap(b,'اضغطي مرة أخرى للتأكيد'))return;
+  try{if(act==='inc'||act==='dec'){const m=Math.max(0,Math.min(20,(+b.dataset.m)+(act==='inc'?1:-1)));await rpc('admin_link_action',{p_pin:PIN,p_token:b.dataset.t,p_action:'set_max',p_max:m});toast('المسموح: '+m+' مرافق')}
+    else{await rpc('admin_link_action',{p_pin:PIN,p_token:b.dataset.t,p_action:act});toast(act==='revoke'?'أُوقف الرابط':'أُعيد تفعيل الرابط')}
+    load()}catch(err){toast('تعذّر الاتصال')}};
 let iComp=0;const setIComp=n=>{iComp=Math.max(0,Math.min(20,n));$('iCompN').textContent=iComp};
 $('iCompMinus').onclick=()=>setIComp(iComp-1);$('iCompPlus').onclick=()=>setIComp(iComp+1);
 function personalInvite(i){let t=invText();const nm=(i.name||'').trim();
@@ -13087,7 +13170,7 @@ $('iq').oninput=()=>renderInv();
 function invState(i){return i.card_no?'yes':i.declined?'no':i.sent_at?'waiting':'unsent'}
 function renderInv(){const L=invData.invites||[];
   $('iOnly').checked=!!invData.invite_only;
-  $('iOnlyNote').textContent=invData.invite_only?('مفعّل: لا يأخذ بطاقة إلا رقم موجود في القائمة ('+L.length+' مدعوة). أي شخص آخر وصله الرابط يظهر له أن الدعوة خاصة.'):'غير مفعّل: أي شخص يفتح الرابط يقدر يأخذ بطاقة. فعّليه بعد إضافة كل المدعوات.';
+  $('iOnlyNote').textContent=invData.invite_only?'مفعّل: الدعوة تفتح فقط من رابط خاص أرسلتِه، أو لرقم أضفتِه في القائمة. الرابط العام بدون رمز يظهر عليه «دعوة خاصة».':'غير مفعّل: أي شخص يفتح الرابط العام يقدر يأخذ بطاقة. فعّليه حتى لا تفتح الدعوة إلا لمن أرسلتِ له.';
   const n={all:L.length,unsent:0,waiting:0,yes:0,no:0};L.forEach(i=>n[invState(i)]++);
   document.querySelectorAll('#ifilters button').forEach(b=>{if(!b.dataset.l)b.dataset.l=b.textContent;b.textContent=b.dataset.l+' ('+(n[b.dataset.f]||0)+')'});
   const q=$('iq').value.trim();

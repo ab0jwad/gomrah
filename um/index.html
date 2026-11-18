@@ -203,6 +203,20 @@ nav button.on{color:#fff;border-color:var(--gold);font-weight:700}
 .musicbtn.on .eq i:nth-child(2){animation-delay:.2s}.musicbtn.on .eq i:nth-child(3){animation-delay:.4s}.musicbtn.on .eq i:nth-child(4){animation-delay:.1s}
 @keyframes eq{0%,100%{height:4px}50%{height:16px}}
 @media (prefers-reduced-motion:reduce){.musicbtn.on .eq i{animation:none;height:10px}}
+.pick{margin-top:14px;padding:12px;background:#f3e8cf;border:1.5px solid #b8924f;border-radius:12px;text-align:center}
+.pickt{margin:0 0 10px;color:#5a0a0e;font-weight:700;line-height:1.7}
+.pickb{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.pickb button{min-width:52px;padding:10px 14px;border-radius:12px;border:2px solid #5a0a0e;background:#fff;color:#5a0a0e;font:inherit;font-size:17px;font-weight:700;cursor:pointer}
+.compedit{margin:12px 0 0;padding:12px;background:#f7efdd;border:1.5px solid #b8924f;border-radius:14px;text-align:center;color:#5a0a0e}
+.compedit>p{margin:0 0 8px;font-weight:700}
+.ce{display:flex;align-items:center;justify-content:center;gap:18px}
+.ce button{width:46px;height:46px;border-radius:50%;border:2px solid #5a0a0e;background:#fff;color:#5a0a0e;font-size:26px;line-height:1;cursor:pointer}
+.ce button:disabled{opacity:.35}
+.ce b{font-size:30px;min-width:40px;font-variant-numeric:tabular-nums}
+.ce.small{justify-content:flex-start}.ce.small button{width:40px;height:40px;font-size:22px}
+.chk{display:flex;align-items:center;gap:10px;font-weight:700;color:#5a0a0e;font-size:17px;margin:0}
+.chk input{width:22px;height:22px;accent-color:#5a0a0e}
+#staff nav button{font-size:16px;padding:10px 2px}
 .toast{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;z-index:30}
 </style>
 </head>
@@ -289,6 +303,10 @@ nav button.on{color:#fff;border-color:var(--gold);font-weight:700}
         <button class="btn sec" id="gNo"><svg class="ic" aria-hidden="true"><use href="#i-no"/></svg> أعتذر</button>
       </div>
       <div class="msg err" id="gErr" hidden></div>
+      <div class="pick" id="gPick" hidden>
+        <p class="pickt" id="gPickT"></p>
+        <div class="pickb" id="gPickB"></div>
+      </div>
       <ul class="rules"><li>الدخول برمز QR</li><li>بطاقة الدخول لمرة واحدة، والباركود لا يُمسح أكثر من مرة</li><li>ممنوع اصطحاب الأطفال</li></ul>
       <p class="note">إذا سبق أن أكّدتِ حضوركِ من هذا الجوال، اكتبي رقمكِ واضغطي «سأحضر» لتظهر بطاقتكِ مرة أخرى.</p>
     </div>
@@ -298,6 +316,11 @@ nav button.on{color:#fff;border-color:var(--gold);font-weight:700}
       <div class="msg ok center" id="gWelcome"></div>
       <img class="cardimg" id="gCardImg" alt="بطاقة الدخول">
       <p class="msg ok center" id="gComp" hidden></p>
+      <div class="compedit" id="gCompEdit" hidden>
+        <p>عدد المرافقات الحاضرات معكِ</p>
+        <div class="ce"><button id="gCompMinus" aria-label="إنقاص">−</button><b id="gCompN">0</b><button id="gCompPlus" aria-label="زيادة">+</button></div>
+        <p class="note" id="gCompMax"></p>
+      </div>
       <p class="note center">اعرضي هذه البطاقة عند الباب. البطاقة شخصية وتُستخدم مرة واحدة فقط، وممنوع اصطحاب الأطفال. احفظيها في الصور لتفتحيها بدون إنترنت.</p>
       <div class="stack">
         <button class="btn" id="gSave"><svg class="ic" aria-hidden="true"><use href="#i-save"/></svg> حفظ البطاقة في الصور</button>
@@ -324,6 +347,7 @@ nav button.on{color:#fff;border-color:var(--gold);font-weight:700}
     <nav id="sNav">
       <button data-v="door">الفحص</button>
       <button data-v="stats">الإحصاء</button>
+      <button data-v="inv" data-admin="1">الدعوات</button>
       <button data-v="list" data-admin="1">الضيوف</button>
       <button data-v="more" data-admin="1">المزيد</button>
     </nav>
@@ -377,6 +401,37 @@ nav button.on{color:#fff;border-color:var(--gold);font-weight:700}
         <div class="st"><b id="st_left">0</b><span>المتبقي من العدد</span></div>
       </div>
       <p class="note" style="text-align:center;color:var(--sand)">تتحدث تلقائياً كل 5 ثوانٍ</p>
+    </section>
+    <section id="v-inv" hidden>
+      <div class="box">
+        <h3 style="margin:0 0 6px;color:var(--burg)">إضافة مدعوة</h3>
+        <label for="iName">الاسم</label><input id="iName" autocomplete="off">
+        <label for="iPhone">رقم الجوال</label><input id="iPhone" inputmode="tel" dir="ltr" placeholder="05xxxxxxxx">
+        <label for="iComp">عدد المرافقين المسموح</label>
+        <div class="ce small"><button id="iCompMinus" type="button">−</button><b id="iCompN">0</b><button id="iCompPlus" type="button">+</button></div>
+        <button class="btn" id="iAdd" style="margin-top:12px"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg> إضافة</button>
+        <div id="iRes"></div>
+      </div>
+      <div class="box">
+        <h3 style="margin:0 0 6px;color:var(--burg)">إضافة قائمة دفعة واحدة</h3>
+        <p class="note">كل مدعوة في سطر: الاسم، الجوال، عدد المرافقين (اختياري). مثال:<br><span dir="ltr">أم محمد، 0551234567، 2</span></p>
+        <textarea id="iBulk" rows="5" style="width:100%;font:inherit;font-size:15px;padding:10px;border-radius:12px;border:2px solid var(--line);background:#fff;color:var(--ink);margin-top:8px"></textarea>
+        <button class="btn sec" id="iBulkBtn" style="margin-top:10px">إضافة الكل</button>
+        <div id="iBulkRes"></div>
+      </div>
+      <div class="box" id="iModeBox">
+        <label class="chk"><input type="checkbox" id="iOnly"> الدعوة للمدعوين فقط</label>
+        <p class="note" id="iOnlyNote"></p>
+      </div>
+      <input id="iq" placeholder="ابحث بالاسم أو الجوال" style="margin-top:16px">
+      <div class="filters" id="ifilters">
+        <button data-f="all" class="on">الكل</button>
+        <button data-f="unsent">لم تُرسل</button>
+        <button data-f="waiting">أُرسلت ولم تؤكد</button>
+        <button data-f="yes">أكّدت</button>
+        <button data-f="no">اعتذرت</button>
+      </div>
+      <div id="irows"></div>
     </section>
     <section id="v-list" hidden>
       <input id="q" placeholder="ابحث بالاسم أو الجوال أو رقم البطاقة">
@@ -12881,11 +12936,16 @@ async function renderCard(no,code,name,comp){
   else{x.fillStyle='#96704a';x.font='20px -apple-system,Tahoma,sans-serif';x.fillText('شخصية · تُستخدم مرة واحدة',cx,y0+458)}
   return c.toDataURL('image/png');
 }
+let curCard=null;
+function compWord(n){return n===1?'مرافقة واحدة':n===2?'مرافقتان':n<=10?n+' مرافقات':n+' مرافقة'}
+function compUpTo(n){return n===1?'مرافقة واحدة':n===2?'مرافقتين':n<=10?n+' مرافقات':n+' مرافقة'}
 async function gShowCard(r){
+  curCard=r;const mx=r.max_comp||0;
+  $('gCompEdit').hidden=!(mx>0);if(mx>0){$('gCompN').textContent=r.companions||0;$('gCompMax').textContent='المسموح لكِ حتى '+compUpTo(mx)+'. إذا اعتذرت مرافقة، أنقصي العدد.';$('gCompMinus').disabled=!(r.companions>0);$('gCompPlus').disabled=!((r.companions||0)<mx)}
   const url=await renderCard(r.no,r.code,r.name,r.companions||0);$('gCardImg').src=url;cardURL=url;
-  $('gComp').textContent=r.companions>0?('بطاقتكِ تشمل '+(r.companions===1?'مرافقة واحدة':r.companions+' مرافقات')+' — عدد الأشخاص '+(1+r.companions)):'';$('gComp').hidden=!(r.companions>0);
+  $('gComp').textContent=r.companions>0?('بطاقتكِ تشمل '+compUpTo(r.companions)+' — عدد الأشخاص '+(1+r.companions)):'';$('gComp').hidden=!(r.companions>0);
   $('gWelcome').textContent=(r.existing?'أهلاً '+r.name+'، هذه بطاقتكِ':'تم تأكيد حضوركِ، حياكِ الله '+r.name+' 🌸');
-  gShow('gCard');window.scrollTo({top:$('gCard').offsetTop-10,behavior:'smooth'});
+  if($('gCard').hidden){gShow('gCard');window.scrollTo({top:$('gCard').offsetTop-10,behavior:'smooth'})}
 }
 function gDone(t,s){$('gDoneT').textContent=t;$('gDoneS').textContent=s||'';gShow('gDone')}
 const EVENT_AT=new Date('2026-11-28T21:00:00+03:00').getTime();
@@ -12909,19 +12969,31 @@ async function musicInit(){
 }
 async function guestInit(){
   $('guest').hidden=false;tick();setInterval(tick,1000);musicInit();$('gName').value=gName;$('gPhone').value=gPhone;
-  if(gPhone){try{const r=await rpc('guest_my_card',{p_phone:gPhone,p_device:gDev});if(r.ok){r.existing=true;await gShowCard(r)}}catch(e){}}
+  if(gPhone){try{const r=await rpc('guest_my_card2',{p_phone:gPhone,p_device:gDev});if(r.ok){r.existing=true;await gShowCard(r)}}catch(e){}}
 }
 function gRead(needName){const nm=$('gName').value.trim(),ph=$('gPhone').value.trim();
   if(needName&&nm.length<2){gErr('اكتبي الاسم');return null}
   if(normPhone(ph).length<11){gErr('اكتبي رقم الجوال كاملاً، مثل 05xxxxxxxx');return null}
   gErr('');return{nm,ph}}
-$('gYes').onclick=async e=>{const v=gRead(true);if(!v)return;const b=e.target;b.disabled=true;
-  try{const r=await rpc('guest_claim',{p_name:v.nm,p_phone:v.ph,p_device:gDev});
-    if(r.ok){if(!r.same_device){gPhone=v.ph;gName=v.nm;ls.set('g_phone',v.ph);ls.set('g_name',v.nm)}else{gName=r.name;ls.set('g_name',r.name)}await gShowCard(r)}
+const NOT_INV='عذراً، هذه الدعوة خاصة بالمدعوين. اكتبي رقم الجوال نفسه الذي وصلتكِ عليه الدعوة، أو تواصلي مع صاحبة الدعوة.';
+async function gClaim(comp){const v=gRead(true);if(!v)return;const b=$('gYes');b.disabled=true;
+  try{const r=await rpc('guest_claim2',{p_name:v.nm,p_phone:v.ph,p_device:gDev,p_comp:comp});
+    if(r.ok){$('gPick').hidden=true;if(!r.same_device){gPhone=v.ph;gName=v.nm;ls.set('g_phone',v.ph);ls.set('g_name',v.nm)}else{gName=r.name;ls.set('g_name',r.name)}await gShowCard(r)}
+    else if(r.err==='choose_comp')showPick(r.max);
+    else if(r.err==='not_invited'){$('gPick').hidden=true;gErr(NOT_INV)}
     else if(r.err==='other_device')gErr(OTHER_DEV);
-    else if(r.err==='full')gDone('نعتذر، اكتمل العدد','شكراً لكِ، ونتمنى رؤيتكِ في مناسبة قادمة.');
+    else if(r.err==='full'){if(comp>0&&r.left>0){gErr('بقي '+r.left+(r.left===1?' مقعد':' مقاعد')+' فقط. اختاري عدداً أقل من المرافقات.')}else{$('gPick').hidden=true;gDone('نعتذر، اكتمل العدد','شكراً لكِ، ونتمنى رؤيتكِ في مناسبة قادمة.')}}
     else gErr('تأكدي من الاسم ورقم الجوال');
-  }catch(err){gErr('تعذّر الاتصال، حاولي مرة أخرى')}b.disabled=false};
+  }catch(err){gErr('تعذّر الاتصال، حاولي مرة أخرى')}b.disabled=false}
+function showPick(mx){$('gPickT').textContent='الدعوة لكِ، ويمكن أن تحضر معكِ حتى '+compUpTo(mx)+'. كم مرافقة ستحضر معكِ؟';
+  let h='';for(let i=0;i<=mx;i++)h+=`<button data-c="${i}">${i===0?'بدون مرافقة':i}</button>`;$('gPickB').innerHTML=h;$('gPick').hidden=false;gErr('');$('gPick').scrollIntoView({behavior:'smooth',block:'center'})}
+$('gPickB').onclick=e=>{const b=e.target.closest('button[data-c]');if(b)gClaim(+b.dataset.c)};
+$('gYes').onclick=()=>gClaim(null);
+async function gSetComp(n){if(!curCard)return;try{const r=await rpc('guest_set_comp',{p_phone:gPhone,p_device:gDev,p_comp:n});
+  if(r.ok){r.existing=true;await gShowCard(r);toast(n>0?'صار عدد المرافقات '+n:'بدون مرافقات')}
+  else toast(r.err==='full'?'لا يوجد مقعد متاح لمرافقة إضافية':r.err==='entered'?'تم الدخول، لا يمكن التعديل':'لا يمكن هذا العدد')}catch(e){toast('تعذّر الاتصال، حاولي مرة أخرى')}}
+$('gCompMinus').onclick=()=>{if(curCard)gSetComp((curCard.companions||0)-1)};
+$('gCompPlus').onclick=()=>{if(curCard)gSetComp((curCard.companions||0)+1)};
 $('gNo').onclick=async e=>{const v=gRead(false);if(!v)return;const b=e.target;if(!twoTap(b,'اضغطي مرة أخرى للتأكيد'))return;b.disabled=true;
   try{const d=await rpc('guest_decline',{p_name:v.nm,p_phone:v.ph,p_device:gDev});if(d.err==='other_device'){gErr(OTHER_DEV);b.disabled=false;return}ls.del('g_phone');gDone('شكراً لإبلاغنا','نتمنى لكِ كل الخير.');gStatus()}catch(err){gErr('تعذّر الاتصال، حاولي مرة أخرى')}b.disabled=false};
 $('gCancel').onclick=async e=>{const b=e.target;if(!twoTap(b,'متأكدة؟ اضغطي مرة أخرى لإلغاء البطاقة'))return;b.disabled=true;
@@ -12938,11 +13010,11 @@ $('gSave').onclick=async()=>{
 const HASH=(()=>{try{return decodeURIComponent(location.hash.replace('#',''))}catch(e){return location.hash.replace('#','')}})();
 const IS_ADMIN=['um','admin','أم-العروسة','ام-العروسة','أم_العروسة','ام_العروسة'].includes(HASH);
 const MODE=IS_ADMIN?'admin':'door';const PKEY=MODE==='admin'?'s_pin_admin':'s_pin_door';
-let PIN=ls.get(PKEY)||'', data=null, stats=null, view='door';
-function sView(v){view=v;document.querySelectorAll('#sNav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));['door','stats','list','more'].forEach(k=>$('v-'+k).hidden=k!==v);if(v!=='door')stopCam();render()}
+let PIN=ls.get(PKEY)||'', data=null, stats=null, invData=null, view='door';
+function sView(v){view=v;document.querySelectorAll('#sNav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));['door','stats','inv','list','more'].forEach(k=>$('v-'+k).hidden=k!==v);if(v!=='door')stopCam();render()}
 document.querySelectorAll('#sNav button').forEach(b=>b.onclick=()=>sView(b.dataset.v));
-async function load(){if(!PIN)return;try{stats=await rpc('staff_stats',{p_pin:PIN});if(MODE==='admin')data=await rpc('admin_list',{p_pin:PIN});render()}catch(e){if(/bad_pin|locked|not_admin/.test(e.message)){ls.del(PKEY);PIN='';showPin(e.message==='locked'?'محاولات كثيرة، انتظري 10 دقائق':'الرقم السري غير صحيح')}}}
-function showPin(err){$('recBox').hidden=true;$('forgotBtn').hidden=MODE!=='admin';$('pinBox').hidden=false;$('sNav').hidden=true;['door','stats','list','more'].forEach(k=>$('v-'+k).hidden=true);$('pinErr').textContent=err||'';$('pinErr').hidden=!err}
+async function load(){if(!PIN)return;try{stats=await rpc('staff_stats',{p_pin:PIN});if(MODE==='admin'){data=await rpc('admin_list',{p_pin:PIN});invData=await rpc('admin_invites',{p_pin:PIN})}render()}catch(e){if(/bad_pin|locked|not_admin/.test(e.message)){ls.del(PKEY);PIN='';showPin(e.message==='locked'?'محاولات كثيرة، انتظري 10 دقائق':'الرقم السري غير صحيح')}}}
+function showPin(err){$('recBox').hidden=true;$('forgotBtn').hidden=MODE!=='admin';$('pinBox').hidden=false;$('sNav').hidden=true;['door','stats','inv','list','more'].forEach(k=>$('v-'+k).hidden=true);$('pinErr').textContent=err||'';$('pinErr').hidden=!err}
 $('pinBtn').onclick=async()=>{const p=$('pin').value.trim();try{await rpc(MODE==='admin'?'admin_action':'staff_stats',MODE==='admin'?{p_pin:p,p_action:'ping'}:{p_pin:p});PIN=p;ls.set(PKEY,p);$('pinBox').hidden=true;$('sNav').hidden=false;sView(view);load()}catch(e){showPin(e.message==='locked'?'محاولات كثيرة، انتظري 10 دقائق':e.message==='not_admin'?'هذا رقم الموظفة، ولا يفتح صفحة الإدارة':'الرقم السري غير صحيح')}};
 $('pin').onkeydown=e=>{if(e.key==='Enter')$('pinBtn').click()};
 $('forgotBtn').onclick=()=>{$('pinBox').hidden=true;$('recBox').hidden=false;$('recErr').hidden=true};
@@ -12959,7 +13031,7 @@ function render(){
     $('sHdr').textContent='دخل '+s.in_persons+' · مؤكد '+s.persons+' / '+s.capacity+' شخصاً';
     const set=(id,v)=>{$(id).textContent=v};set('st_persons',s.persons);set('st_in',s.in_persons);set('st_wait',s.wait_persons);set('st_cards',s.cards);set('st_compc',s.comp_cards);set('st_comp',s.companions);set('st_cx',s.cancelled);set('st_dec',s.declines);set('st_cap',s.capacity);set('st_left',Math.max(0,s.capacity-s.persons));
     $('capInfo').textContent='العدد الحالي: '+s.capacity+' شخصاً — المؤكدون الآن: '+s.persons+' — المتبقي: '+Math.max(0,s.capacity-s.persons)}
-  if(MODE==='admin'&&data&&view==='list')renderList()}
+  if(MODE==='admin'&&data&&view==='list')renderList();if(MODE==='admin'&&invData&&view==='inv')renderInv()}
 let filt='taken';
 document.querySelectorAll('#filters button').forEach(b=>b.onclick=()=>{filt=b.dataset.f;document.querySelectorAll('#filters button').forEach(x=>x.classList.toggle('on',x===b));renderList()});
 $('q').oninput=()=>renderList();
@@ -12976,7 +13048,7 @@ function renderList(){
   items=data.cards.filter(c=>{
     if(q&&!((c.name||'').includes(q)||(c.phone||'').includes(normPhone(q)||'@')||pad(c.no).includes(q)))return false;
     switch(filt){case'taken':return c.status==='taken';case'comp':return c.status==='taken'&&c.companions>0;case'in':return c.status==='taken'&&c.entered_at;case'wait':return c.status==='taken'&&!c.entered_at;case'norem':return c.status==='taken'&&!c.reminded_at&&!c.entered_at;case'rem':return c.status==='taken'&&!!c.reminded_at;case'cx':return c.status==='cancelled'}return true});
-  $('rows').innerHTML=items.map(c=>{const ch=[];if(c.status==='cancelled')ch.push('<span class="chip cx">ملغاة</span>');if(c.entered_at)ch.push('<span class="chip in">دخلت</span>');if(c.status==='taken'&&!c.entered_at)ch.push(c.reminded_at?'<span class="chip rm">✓ ذُكّرت '+fmtT(c.reminded_at)+'</span>':'<span class="chip" style="background:#fff4e0;color:#9a5b00">لم تُذكَّر</span>');if(c.companions>0)ch.push('<span class="chip in" style="background:#eef0e4;color:#55623a">+'+c.companions+' مرافق</span>');
+  $('rows').innerHTML=items.map(c=>{const ch=[];if(c.status==='cancelled')ch.push('<span class="chip cx">ملغاة</span>');if(c.entered_at)ch.push('<span class="chip in">دخلت</span>');if(c.status==='taken'&&!c.entered_at)ch.push(c.reminded_at?'<span class="chip rm">✓ ذُكّرت '+fmtT(c.reminded_at)+'</span>':'<span class="chip" style="background:#fff4e0;color:#9a5b00">لم تُذكَّر</span>');if(c.companions>0)ch.push('<span class="chip in" style="background:#eef0e4;color:#55623a">+'+c.companions+' مرافق</span>');if(invData&&c.status==='taken'&&!invPhones().has(c.phone))ch.push('<span class="chip cx">ليست في قائمة المدعوين</span>');
     const a=[];if(c.status==='taken'){a.push(`<button data-a="comp_dec" data-n="${c.no}" data-q="1"><svg class="ic" aria-hidden="true"><use href="#i-minus"/></svg> مرافق</button>`);a.push(`<button data-a="comp_inc" data-n="${c.no}" data-q="1"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg> مرافق</button>`)}
     if(c.status==='taken'&&!c.entered_at)a.push(`<button data-a="manual_in" data-n="${c.no}"><svg class="ic" aria-hidden="true"><use href="#i-door"/></svg> دخول يدوي</button>`);
     if(c.status==='taken'&&c.bound)a.push(`<button data-a="release" data-n="${c.no}"><svg class="ic" aria-hidden="true"><use href="#i-unlink"/></svg> فك ربط الجوال</button>`);
@@ -12988,6 +13060,57 @@ $('rows').onclick=async e=>{const ln=e.target.closest('a[data-rem]');if(ln){rpc(
   try{if(b.dataset.a==='manual_in'){await checkin(null,+b.dataset.n);return}
     const r=await rpc('admin_action',{p_pin:PIN,p_action:b.dataset.a,p_no:+b.dataset.n});
     toast(r&&r.err==='full'?'لا يمكن: العدد مكتمل':'تم');load()}catch(err){toast('تعذّر الاتصال')}};
+function invPhones(){return new Set(((invData&&invData.invites)||[]).map(i=>i.phone))}
+let iComp=0;const setIComp=n=>{iComp=Math.max(0,Math.min(20,n));$('iCompN').textContent=iComp};
+$('iCompMinus').onclick=()=>setIComp(iComp-1);$('iCompPlus').onclick=()=>setIComp(iComp+1);
+function personalInvite(i){let t=invText();const nm=(i.name||'').trim();
+  if(nm)t=t.replace(/^حياكم الله 🌸/,'حياكِ الله '+nm+' 🌸');
+  const extra=[];if(i.max_comp>0)extra.push('💌 الدعوة لكِ ومعكِ '+compWord(i.max_comp)+'.');
+  extra.push('عند التأكيد اكتبي رقم جوالكِ الذي وصلتكِ عليه هذه الرسالة.');
+  return t.replace(GUEST_URL,GUEST_URL+'\n'+extra.join('\n'))}
+function waLink(i){return 'https://wa.me/'+i.phone+'?text='+encodeURIComponent(personalInvite(i))}
+async function saveInvite(name,phone,max){return rpc('admin_invite_save',{p_pin:PIN,p_name:name,p_phone:phone,p_max:max})}
+$('iAdd').onclick=async()=>{const nm=$('iName').value.trim(),ph=$('iPhone').value.trim();if(normPhone(ph).length<11){toast('اكتبي رقم الجوال كاملاً');return}
+  try{const r=await saveInvite(nm,ph,iComp);if(!r.ok){toast('تأكدي من البيانات');return}
+    const i={phone:r.phone,name:nm,max_comp:iComp};
+    $('iRes').innerHTML=`<div class="msg ok">أُضيفت ${esc(nm||showPh(r.phone))}${iComp>0?' ومعها '+compWord(iComp):''}</div><a class="btn" style="margin-top:8px" data-sent="${r.phone}" target="_blank" rel="noopener" href="${waLink(i)}"><svg class="ic" aria-hidden="true"><use href="#i-wa"/></svg> إرسال الدعوة لها بالواتساب</a>`;
+    $('iName').value='';$('iPhone').value='';setIComp(0);load()}catch(e){toast('تعذّر الاتصال')}};
+$('iRes').onclick=e=>{const a=e.target.closest('a[data-sent]');if(a)rpc('admin_invite_action',{p_pin:PIN,p_phone:a.dataset.sent,p_action:'sent'}).then(load)};
+$('iBulkBtn').onclick=async()=>{const lines=$('iBulk').value.split(/\n+/).map(s=>s.trim()).filter(Boolean);let ok=0,bad=[];
+  for(const L of lines){const parts=L.split(/[,،\t;|]+/).map(s=>s.trim()).filter(Boolean);let ph=null,nm=[],cp=0;
+    for(const p of parts){const d=p.replace(/\D/g,'');if(!ph&&d.length>=9&&/^[+\d\s-]+$/.test(p))ph=p;else if(/^\d{1,2}$/.test(p))cp=+p;else nm.push(p)}
+    if(!ph||normPhone(ph).length<11){bad.push(L);continue}
+    try{const r=await saveInvite(nm.join(' '),ph,Math.min(20,cp));r.ok?ok++:bad.push(L)}catch(e){bad.push(L)}}
+  $('iBulkRes').innerHTML=`<div class="msg ${bad.length?'err':'ok'}">أُضيفت ${ok}${bad.length?(' — لم تُقبل هذه الأسطر:<br>'+bad.map(esc).join('<br>')):''}</div>`;if(!bad.length)$('iBulk').value='';load()};
+$('iOnly').onchange=async e=>{try{await rpc('admin_set_invite_only',{p_pin:PIN,p_on:e.target.checked});toast(e.target.checked?'صارت الدعوة للمدعوين فقط':'صار الرابط مفتوحاً لأي شخص');load()}catch(err){toast('تعذّر الاتصال')}};
+let ifilt='all';
+document.querySelectorAll('#ifilters button').forEach(b=>b.onclick=()=>{ifilt=b.dataset.f;document.querySelectorAll('#ifilters button').forEach(x=>x.classList.toggle('on',x===b));renderInv()});
+$('iq').oninput=()=>renderInv();
+function invState(i){return i.card_no?'yes':i.declined?'no':i.sent_at?'waiting':'unsent'}
+function renderInv(){const L=invData.invites||[];
+  $('iOnly').checked=!!invData.invite_only;
+  $('iOnlyNote').textContent=invData.invite_only?('مفعّل: لا يأخذ بطاقة إلا رقم موجود في القائمة ('+L.length+' مدعوة). أي شخص آخر وصله الرابط يظهر له أن الدعوة خاصة.'):'غير مفعّل: أي شخص يفتح الرابط يقدر يأخذ بطاقة. فعّليه بعد إضافة كل المدعوات.';
+  const n={all:L.length,unsent:0,waiting:0,yes:0,no:0};L.forEach(i=>n[invState(i)]++);
+  document.querySelectorAll('#ifilters button').forEach(b=>{if(!b.dataset.l)b.dataset.l=b.textContent;b.textContent=b.dataset.l+' ('+(n[b.dataset.f]||0)+')'});
+  const q=$('iq').value.trim();
+  const items=L.filter(i=>(ifilt==='all'||invState(i)===ifilt)&&(!q||(i.name||'').includes(q)||i.phone.includes(normPhone(q)||'@')));
+  $('irows').innerHTML=items.map(i=>{const st=invState(i);const ch=[];
+    ch.push(i.max_comp>0?`<span class="chip in" style="background:#eef0e4;color:#55623a">مسموح ${i.max_comp} مرافق</span>`:'<span class="chip">بدون مرافقين</span>');
+    if(st==='yes')ch.push(`<span class="chip in">أكّدت${i.card_comp>0?' مع '+i.card_comp:''}${i.entered?' · دخلت':''}</span>`);
+    else if(st==='no')ch.push('<span class="chip cx">اعتذرت</span>');
+    else if(st==='waiting')ch.push('<span class="chip rm">✓ أُرسلت '+fmtT(i.sent_at)+'</span>');
+    else ch.push('<span class="chip" style="background:#fff4e0;color:#9a5b00">لم تُرسل</span>');
+    const a=[`<a data-sent="${i.phone}" target="_blank" rel="noopener" href="${waLink(i)}"><svg class="ic" aria-hidden="true"><use href="#i-wa"/></svg> ${i.sent_at?'إرسال مرة أخرى':'إرسال الدعوة'}</a>`,
+      `<button data-ia="dec" data-p="${i.phone}" data-m="${i.max_comp}" data-nm="${esc(i.name||'')}"><svg class="ic" aria-hidden="true"><use href="#i-minus"/></svg> مرافق</button>`,
+      `<button data-ia="inc" data-p="${i.phone}" data-m="${i.max_comp}" data-nm="${esc(i.name||'')}"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg> مرافق</button>`];
+    if(i.sent_at&&st==='waiting')a.push(`<button data-ia="unsent" data-p="${i.phone}"><svg class="ic" aria-hidden="true"><use href="#i-undo"/></svg> لم أرسلها</button>`);
+    if(!i.card_no)a.push(`<button data-ia="remove" data-p="${i.phone}"><svg class="ic" aria-hidden="true"><use href="#i-cancel"/></svg> إزالة من القائمة</button>`);
+    return `<div class="item"><div class="h"><span class="nm">${esc(i.name)||'—'}</span><span class="ph">${esc(showPh(i.phone))}</span>${ch.join('')}</div><div class="acts">${a.join('')}</div></div>`}).join('')||'<p class="note" style="color:var(--sand)">لا توجد مدعوات بعد. أضيفي أول مدعوة من الأعلى.</p>'}
+$('irows').onclick=async e=>{const a=e.target.closest('a[data-sent]');if(a){rpc('admin_invite_action',{p_pin:PIN,p_phone:a.dataset.sent,p_action:'sent'}).then(load);return}
+  const b=e.target.closest('button[data-ia]');if(!b)return;const act=b.dataset.ia;
+  try{if(act==='inc'||act==='dec'){const m=Math.max(0,Math.min(20,(+b.dataset.m)+(act==='inc'?1:-1)));await saveInvite(b.dataset.nm,b.dataset.p,m);toast('المسموح: '+m+' مرافق')}
+    else{if(act==='remove'&&!twoTap(b,'اضغطي مرة أخرى للإزالة'))return;await rpc('admin_invite_action',{p_pin:PIN,p_phone:b.dataset.p,p_action:act});toast('تم')}
+    load()}catch(err){toast('تعذّر الاتصال')}};
 const INV_DEFAULT='حياكم الله 🌸\nيسعدنا دعوتكم لحضور مناسبة غمرة دانة\n📅 يوم السبت 18/06/1448هـ الموافق 28/11/2026م\n📍 موقع القاعة: '+MAPS+'\n\nلتأكيد الحضور أو الاعتذار واستلام بطاقة الدخول، افتحوا الرابط:\n'+GUEST_URL+'\n\nنرجو التأكيد مبكراً 🤍';
 function invText(){let t=$('invTxt').value.trim()||INV_DEFAULT;if(!t.includes(GUEST_URL))t+='\n'+GUEST_URL;return t}
 function invSync(){$('waInv').href='https://wa.me/?text='+encodeURIComponent(invText())}
@@ -13063,7 +13186,7 @@ $('photo').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)
 function route(){
   const h=IS_ADMIN?'admin':HASH;
   if(h==='door'||h==='admin'){
-    $('guest').hidden=true;$('staff').hidden=false;view=h==='admin'?'list':'door';if(h!=='admin')document.querySelectorAll('#sNav [data-admin]').forEach(b=>b.remove());$('sTitle').textContent=h==='admin'?'أم العروسة':'فحص الدخول';
+    $('guest').hidden=true;$('staff').hidden=false;view=h==='admin'?'inv':'door';if(h!=='admin')document.querySelectorAll('#sNav [data-admin]').forEach(b=>b.remove());$('sTitle').textContent=h==='admin'?'أم العروسة':'فحص الدخول';
     if(PIN){$('pinBox').hidden=true;$('sNav').hidden=false;sView(view);load()}else showPin();
   }else{$('staff').hidden=true;stopCam();guestInit()}
 }

@@ -13142,7 +13142,8 @@ function renderLinks(){const L=linkData||[];const n={all:L.length,new:0,yes:0,cx
     return `<div class="item"><div class="h"><span class="nm">${title}</span>${ph}${ch.join('')}</div><div class="acts">${a.join('')}</div></div>`}).join('')||'<p class="note" style="color:var(--sand)">لم تُرسل أي دعوة بعد. اضغطي «إنشاء رابط الدعوة» في الأعلى.</p>'}
 $('lrows').onclick=async e=>{const b=e.target.closest('button[data-la]');if(!b)return;const act=b.dataset.la;
   if(!b.dataset.q&&!twoTap(b,'اضغطي مرة أخرى للتأكيد'))return;
-  try{if(act==='inc'||act==='dec'){const m=Math.max(0,Math.min(20,(+b.dataset.m)+(act==='inc'?1:-1)));await rpc('admin_link_action',{p_pin:PIN,p_token:b.dataset.t,p_action:'set_max',p_max:m});toast('المسموح: '+m+' مرافق')}
+  try{if(act==='inc'||act==='dec'){const r=await rpc('admin_link_action',{p_pin:PIN,p_token:b.dataset.t,p_action:act});
+      if(r.ok){const l=(linkData||[]).find(x=>x.token===b.dataset.t);if(l)l.max_comp=r.max_comp;renderLinks();toast('المسموح: '+r.max_comp+' مرافق')}return}
     else{await rpc('admin_link_action',{p_pin:PIN,p_token:b.dataset.t,p_action:act});toast(act==='revoke'?'أُوقف الرابط':'أُعيد تفعيل الرابط')}
     load()}catch(err){toast('تعذّر الاتصال')}};
 let iComp=0;const setIComp=n=>{iComp=Math.max(0,Math.min(20,n));$('iCompN').textContent=iComp};
@@ -13192,7 +13193,8 @@ function renderInv(){const L=invData.invites||[];
     return `<div class="item"><div class="h"><span class="nm">${esc(i.name)||'—'}</span><span class="ph">${esc(showPh(i.phone))}</span>${ch.join('')}</div><div class="acts">${a.join('')}</div></div>`}).join('')||'<p class="note" style="color:var(--sand)">لا توجد مدعوات بعد. أضيفي أول مدعوة من الأعلى.</p>'}
 $('irows').onclick=async e=>{const a=e.target.closest('a[data-sent]');if(a){rpc('admin_invite_action',{p_pin:PIN,p_phone:a.dataset.sent,p_action:'sent'}).then(load);return}
   const b=e.target.closest('button[data-ia]');if(!b)return;const act=b.dataset.ia;
-  try{if(act==='inc'||act==='dec'){const m=Math.max(0,Math.min(20,(+b.dataset.m)+(act==='inc'?1:-1)));await saveInvite(b.dataset.nm,b.dataset.p,m);toast('المسموح: '+m+' مرافق')}
+  try{if(act==='inc'||act==='dec'){const r=await rpc('admin_invite_action',{p_pin:PIN,p_phone:b.dataset.p,p_action:act});
+      if(r.ok){const i=((invData&&invData.invites)||[]).find(x=>x.phone===b.dataset.p);if(i)i.max_comp=r.max_comp;renderInv();toast('المسموح: '+r.max_comp+' مرافق')}return}
     else{if(act==='remove'&&!twoTap(b,'اضغطي مرة أخرى للإزالة'))return;await rpc('admin_invite_action',{p_pin:PIN,p_phone:b.dataset.p,p_action:act});toast('تم')}
     load()}catch(err){toast('تعذّر الاتصال')}};
 const INV_DEFAULT='حياكم الله 🌸\nيسعدنا دعوتكم لحضور مناسبة غمرة دانة\n📅 يوم السبت 18/06/1448هـ الموافق 28/11/2026م\n📍 موقع القاعة: '+MAPS+'\n\nلتأكيد الحضور أو الاعتذار واستلام بطاقة الدخول، افتحوا الرابط:\n'+GUEST_URL+'\n\nنرجو التأكيد مبكراً 🤍';

@@ -12957,6 +12957,10 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
 const API='https://rhjpblazeuksqzlhdomn.supabase.co/rest/v1/rpc/', KEY='sb_publishable_aXvh7LsChsFkF_7cirPDpA_cUMgtYWs';
 const GUEST_URL='https://ab0jwad.github.io/gomrah/';
 const MAPS='https://maps.app.goo.gl/qinSGP4HHEeGfou36';
+const APP_VER='1795175470';
+(function(){try{fetch('version.txt?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():'').then(v=>{v=(v||'').trim();if(!v||v===APP_VER)return;
+  let k='rl_'+v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,'1')}catch(e){}
+  const u=new URL(location.href);u.searchParams.set('v',v);location.replace(u.toString())}).catch(()=>{})}catch(e){}})();
 const $=id=>document.getElementById(id);
 const pad=n=>String(n).padStart(3,'0');
 const ls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
@@ -13033,6 +13037,7 @@ const LOCK_MSG={private:'هذه الدعوة خاصة بالمدعوين. افت
 async function guestInit(){
   $('guest').hidden=false;tick();setInterval(tick,1000);$('gName').value=gName;$('gPhone').value=gPhone;
   let gate=null;try{gate=await rpc('guest_gate',{p_token:TOKEN||null,p_device:gDev})}catch(e){gate=null}
+  if(gate&&gate.ignored_token){ls.del('g_tok');TOKEN=''}
   // an old/invalid private code (saved on this phone, or in the link) must not block the general invitation
   if(gate&&!gate.open&&TOKEN&&(!URL_TOK||(gate.only&&gate.general_open))){ls.del('g_tok');TOKEN='';
     try{gate=await rpc('guest_gate',{p_token:null,p_device:gDev})}catch(e){gate=null}}

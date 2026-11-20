@@ -13026,13 +13026,16 @@ async function musicInit(){
 }
 const URL_TOK=(new URLSearchParams(location.search).get('i')||'').trim().toUpperCase();
 if(URL_TOK)ls.set('g_tok',URL_TOK);
-const TOKEN=URL_TOK||ls.get('g_tok')||'';
+let TOKEN=URL_TOK||ls.get('g_tok')||'';
 const LOCK_MSG={private:'هذه الدعوة خاصة بالمدعوين. افتحي الرابط الذي وصلكِ من صاحبة الدعوة.',
   used:'هذا الرابط استُخدم من جوال آخر. إذا كانت الدعوة لكِ، تواصلي مع صاحبة الدعوة لترسل لكِ رابطاً جديداً.',
   bad_link:'هذا الرابط غير صالح أو أُلغي. تواصلي مع صاحبة الدعوة.'};
 async function guestInit(){
   $('guest').hidden=false;tick();setInterval(tick,1000);$('gName').value=gName;$('gPhone').value=gPhone;
   let gate=null;try{gate=await rpc('guest_gate',{p_token:TOKEN||null,p_device:gDev})}catch(e){gate=null}
+  // an old/invalid private code (saved on this phone, or in the link) must not block the general invitation
+  if(gate&&!gate.open&&TOKEN&&(!URL_TOK||(gate.only&&gate.general_open))){ls.del('g_tok');TOKEN='';
+    try{gate=await rpc('guest_gate',{p_token:null,p_device:gDev})}catch(e){gate=null}}
   if(gate&&!gate.open){$('guest').classList.add('locked');$('gLocked').hidden=false;$('gLockedT').textContent=LOCK_MSG[gate.why]||LOCK_MSG.private;return}
   if(gate&&gate.only&&gate.general_open&&!TOKEN){$('gListNote').textContent='اكتبي اسمكِ ورقم جوالكِ واضغطي «سأحضر»، ويصل طلبكِ لصاحبة الدعوة للموافقة.';$('gListNote').hidden=false}
   else if(gate&&gate.list&&!TOKEN)$('gListNote').hidden=false;

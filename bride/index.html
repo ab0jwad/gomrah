@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#5a0a0e">
+<base href="../">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest-bride.json">
+<meta name="apple-mobile-web-app-title" content="دعوات العروسة">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@700&family=Amiri:wght@400;700&display=swap">
+<title>دعوات العروسة — غمرة دانة</title>
+<style>
+:root{--burg:#58060a;--gold:#c9a36e;--cream:#f6eede;--ink:#2b1a14;--muted:#8a7360;--ok:#1f8a4c;--bad:#b3261e;--line:#e3d5bb;--card:#fffdf8}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{color-scheme:light}
+html,body{margin:0;background:var(--cream);color:var(--ink);font-family:-apple-system,"Segoe UI",Tahoma,"Noto Naskh Arabic",sans-serif}
+main{max-width:520px;margin:0 auto;padding:calc(18px + env(safe-area-inset-top,0px)) 16px calc(40px + env(safe-area-inset-bottom,0px))}
+header{text-align:center;padding:10px 0 4px}
+header h1{font-family:"Aref Ruqaa",serif;font-size:40px;color:var(--burg);margin:0;line-height:1.2}
+header p{margin:2px 0 0;font-family:"Amiri",serif;font-size:19px;color:var(--muted)}
+.flag{display:block;margin:10px auto 0;width:44px;height:7px;border-radius:1.5px;background:linear-gradient(#ce1126 0 33.34%,#fff 33.34% 66.67%,#000 66.67%);box-shadow:0 0 0 1px rgba(184,146,79,.85)}
+.box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-top:14px}
+h3{margin:0 0 6px;color:var(--burg);font-size:19px}
+label{display:block;font-size:14px;color:var(--muted);margin:12px 0 6px}
+input{width:100%;font:inherit;font-size:18px;padding:13px;border-radius:12px;border:2px solid var(--line);background:#fff;color:var(--ink)}
+input:focus{outline:none;border-color:var(--gold)}
+.btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;border:0;border-radius:14px;padding:15px;font:inherit;font-size:18px;font-weight:700;background:var(--burg);color:#fff;text-decoration:none;cursor:pointer;margin-top:10px}
+.btn.sec{background:#fff;color:var(--burg);border:2px solid var(--burg)}
+.btn:disabled{opacity:.55}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.msg{padding:12px;border-radius:12px;margin-top:12px;line-height:1.8;font-size:15px}
+.msg.err{background:#fde8e6;color:var(--bad)}.msg.ok{background:#e6f2ea;color:var(--ok)}
+.note{font-size:14px;color:var(--muted);line-height:1.8;margin:8px 0 0}
+.ce{display:flex;align-items:center;gap:18px}
+.ce button{width:42px;height:42px;border-radius:50%;border:2px solid #5a0a0e;background:#fff;color:#5a0a0e;font-size:24px;line-height:1;cursor:pointer}
+.ce b{font-size:28px;min-width:30px;text-align:center;font-variant-numeric:tabular-nums}
+.filters{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0 10px}
+.filters button{font:inherit;font-size:14px;padding:7px 12px;border-radius:20px;border:1.5px solid var(--line);background:#fff;color:var(--ink);cursor:pointer}
+.filters button.on{background:var(--burg);color:#fff;border-color:var(--burg)}
+.item{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px}
+.item .h{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.item .nm{font-weight:700}
+.chip{font-size:12px;border-radius:20px;padding:2px 9px;background:#eee;color:#555}
+.chip.in{background:#dff3e6;color:var(--ok)}.chip.cx{background:#fde8e6;color:var(--bad)}.chip.wait{background:#fff4e0;color:#9a5b00}
+.acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.acts button,.acts a{font:inherit;font-size:13px;padding:6px 10px;border-radius:10px;border:1.5px solid var(--line);background:#fff;color:var(--burg);text-decoration:none;cursor:pointer}
+.toast{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;z-index:30}
+.out{background:none;border:0;color:var(--muted);font:inherit;font-size:14px;text-decoration:underline;cursor:pointer;display:block;margin:22px auto 0}
+</style>
+</head>
+<body>
+<main>
+  <header><h1>دعوات العروسة</h1><p>غمرة دانة — السبت 28 / 11</p><span class="flag" aria-hidden="true"></span></header>
+
+  <div class="box" id="pinBox">
+    <h3>الدخول</h3>
+    <p class="note">اكتبي الرقم السري الخاص بكِ (من أم العروسة).</p>
+    <input id="pin" inputmode="numeric" maxlength="8" placeholder="••••••" dir="ltr" style="text-align:center;letter-spacing:6px">
+    <button class="btn" id="pinBtn">دخول</button>
+    <div class="msg err" id="pinErr" hidden></div>
+  </div>
+
+  <div id="app" hidden>
+    <div class="box">
+      <h3>دعوة صديقة</h3>
+      <p class="note">كل ضغطة تُنشئ رابطاً خاصاً لصديقة واحدة، يفتح من جوالها فقط. إذا أعادت إرساله لغيرها لا يفتح معها.</p>
+      <label for="fName">اسم الصديقة</label>
+      <input id="fName" autocomplete="off" placeholder="مثال: ريم">
+      <label>عدد المرافقات المسموح لها</label>
+      <div class="ce"><button id="cMinus" type="button" aria-label="أقل">−</button><b id="cN">0</b><button id="cPlus" type="button" aria-label="أكثر">+</button></div>
+      <button class="btn" id="make">إنشاء دعوة لها</button>
+      <div id="res"></div>
+    </div>
+
+    <div class="filters" id="filters">
+      <button data-f="all" class="on">الكل</button>
+      <button data-f="new">لم تفتح بعد</button>
+      <button data-f="yes">أكّدت</button>
+      <button data-f="cx">ألغت</button>
+      <button data-f="rev">ملغي</button>
+    </div>
+    <div id="rows"></div>
+    <button class="out" id="logout">تسجيل الخروج من هذا الجوال</button>
+  </div>
+</main>
+<div class="toast" id="toast" hidden></div>
+<script>
+const API='https://rhjpblazeuksqzlhdomn.supabase.co/rest/v1/rpc/', KEY='sb_publishable_aXvh7LsChsFkF_7cirPDpA_cUMgtYWs';
+const GUEST_URL='https://ab0jwad.github.io/gomrah/', MAPS='https://maps.app.goo.gl/qinSGP4HHEeGfou36';
+const $=id=>document.getElementById(id);
+const ls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+async function rpc(fn,body){const r=await fetch(API+fn,{method:'POST',headers:{apikey:KEY,'Content-Type':'application/json'},body:JSON.stringify(body||{})});const j=await r.json().catch(()=>null);if(!r.ok)throw new Error((j&&j.message)||('http '+r.status));return j}
+function toast(t){const e=$('toast');e.textContent=t;e.hidden=false;clearTimeout(e._t);e._t=setTimeout(()=>e.hidden=true,2600)}
+function twoTap(b,msg){if(b.dataset.c)return true;b.dataset.c=1;const t=b.innerHTML;b.textContent=msg;setTimeout(()=>{if(b.isConnected){delete b.dataset.c;b.innerHTML=t}},3500);return false}
+function compWord(n){return n===1?'مرافقة واحدة':n===2?'مرافقتان':n+' مرافقات'}
+function compWith(n){return n===1?'مرافقة واحدة':n===2?'مرافقتين':n+' مرافقات'}
+const MAXC=5;
+let PIN=ls.get('b_pin')||'', comp=0, links=[], filt='all', busy=false, pendTok=null, pendKey='';
+function setComp(n){comp=Math.max(0,Math.min(MAXC,n));$('cN').textContent=comp;$('cMinus').disabled=comp===0;$('cPlus').disabled=comp===MAXC}
+$('cMinus').onclick=()=>setComp(comp-1);$('cPlus').onclick=()=>setComp(comp+1);setComp(0);
+function newTok(){const A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';const u=new Uint32Array(7);crypto.getRandomValues(u);return Array.from(u,x=>A[x%A.length]).join('')}
+function inviteText(l){const nm=(l.label||'').trim();const lines=['حياكِ الله'+(nm?' '+nm:'')+' 🌸','يسعدنا دعوتكِ لحضور مناسبة غمرة دانة','📅 يوم السبت 18/06/1448هـ الموافق 28/11/2026م','📍 موقع القاعة: '+MAPS,''];
+  if(l.max_comp>0)lines.push('💌 الدعوة لكِ ومعكِ '+compWord(l.max_comp)+'.');
+  lines.push('لتأكيد الحضور أو الاعتذار واستلام بطاقة الدخول، افتحي الرابط:',GUEST_URL+'?i='+l.token,'هذا الرابط خاص بكِ، يرجى عدم إرساله لغيركِ.','','نرجو التأكيد مبكراً 🤍');return lines.join('\n')}
+function acts(l){return `<a class="btn" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(inviteText(l))}">إرسال بالواتساب</a><div class="row2"><button class="btn sec" data-share="${l.token}">مشاركة</button><button class="btn sec" data-copy="${l.token}">نسخ</button></div>`}
+const made={};
+function findL(tk){return made[tk]||links.find(x=>x.token===tk)}
+async function shareOrCopy(tk,share){const l=findL(tk);if(!l)return;const t=inviteText(l);
+  if(share&&navigator.share){try{await navigator.share({text:t});return}catch(e){if(e&&e.name==='AbortError')return}}
+  try{await navigator.clipboard.writeText(t);toast('نُسخت الدعوة مع رابطها الخاص')}catch(e){toast('تعذّر النسخ')}}
+document.addEventListener('click',e=>{const s=e.target.closest('[data-share]');if(s){shareOrCopy(s.dataset.share,true);return}const c=e.target.closest('[data-copy]');if(c){shareOrCopy(c.dataset.copy,false);return}
+  const r=e.target.closest('[data-rev]');if(r){if(!twoTap(r,'اضغطي مرة أخرى لإلغاء الدعوة'))return;rpc('bride_link_revoke',{p_pin:PIN,p_token:r.dataset.rev}).then(()=>{toast('أُلغيت الدعوة');load()}).catch(()=>toast('تعذّر الاتصال'))}});
+$('make').onclick=async e=>{if(busy)return;const lab=$('fName').value.trim();
+  if(!lab){toast('اكتبي اسم الصديقة');$('fName').focus();return}
+  if(links.some(x=>!x.revoked&&!x.used&&(x.label||'').trim()===lab)&&!twoTap(e.currentTarget,'لها دعوة لم تُفتح بعد — اضغطي مرة أخرى لإنشاء جديدة'))return;
+  const key=lab+'|'+comp;if(!pendTok||pendKey!==key){pendTok=newTok();pendKey=key}
+  busy=true;$('make').disabled=true;
+  try{const r=await rpc('bride_link_create',{p_pin:PIN,p_label:lab,p_max:comp,p_token:pendTok});
+    if(!r.ok){toast('تعذّر إنشاء الدعوة');return}pendTok=null;
+    const l={token:r.token,label:lab,max_comp:comp};made[r.token]=l;
+    $('res').innerHTML=`<div class="msg ok">جاهزة لـ${esc(lab)}${comp>0?' — مع '+compWith(comp):''}. اختاري صديقتكِ في الواتساب وأرسلي.</div>`+acts(l);
+    $('fName').value='';setComp(0);load()}
+  catch(err){if(/bad_pin|locked/.test(err.message)){logout(err.message);return}toast('تعذّر الاتصال')}
+  finally{busy=false;$('make').disabled=false}};
+function st(l){return l.revoked?'rev':l.card_status==='taken'?'yes':l.card_status==='cancelled'?'cx':'new'}
+function render(){const n={all:links.length,new:0,yes:0,cx:0,rev:0};links.forEach(l=>n[st(l)]++);
+  document.querySelectorAll('#filters button').forEach(b=>{if(!b.dataset.l)b.dataset.l=b.textContent;b.textContent=b.dataset.l+' ('+n[b.dataset.f]+')'});
+  const items=links.filter(l=>filt==='all'||st(l)===filt);
+  $('rows').innerHTML=items.map(l=>{const s=st(l);const ch=[];
+    if(s==='yes')ch.push('<span class="chip in">أكّدت'+(l.card_comp>0?' +'+l.card_comp:'')+'</span>');
+    if(s==='yes'&&l.entered)ch.push('<span class="chip in">دخلت</span>');
+    if(s==='cx')ch.push('<span class="chip cx">ألغت</span>');
+    if(s==='new')ch.push('<span class="chip wait">لم تفتح بعد</span>');
+    if(s==='rev')ch.push('<span class="chip cx">ملغية</span>');
+    if(l.max_comp>0)ch.push('<span class="chip">مسموح '+l.max_comp+'</span>');
+    const a=[];if(s==='new'){a.push(`<button data-share="${l.token}">إعادة الإرسال</button>`);a.push(`<button data-rev="${l.token}">إلغاء الدعوة</button>`)}
+    return `<div class="item"><div class="h"><span class="nm">${esc(l.label||l.card_name||'بدون اسم')}</span>${ch.join('')}</div>${a.length?'<div class="acts">'+a.join('')+'</div>':''}</div>`}).join('')||'<p class="note" style="text-align:center">لا يوجد بعد.</p>'}
+document.querySelectorAll('#filters button').forEach(b=>b.onclick=()=>{filt=b.dataset.f;document.querySelectorAll('#filters button').forEach(x=>x.classList.toggle('on',x===b));render()});
+async function load(){if(!PIN)return;try{links=await rpc('bride_links',{p_pin:PIN});
+  const sh=$('res').querySelector('[data-copy]');if(sh&&!links.some(x=>x.token===sh.dataset.copy))$('res').innerHTML='';render()}
+  catch(e){if(/bad_pin|locked/.test(e.message))logout(e.message)}}
+function logout(why){PIN='';ls.del('b_pin');$('app').hidden=true;$('pinBox').hidden=false;
+  if(why){$('pinErr').textContent=/locked/.test(why)?'محاولات كثيرة، انتظري 10 دقائق':'الرقم السري تغيّر، اطلبيه من أم العروسة';$('pinErr').hidden=false}}
+$('logout').onclick=e=>{if(twoTap(e.target,'اضغطي مرة أخرى للخروج'))logout()};
+$('pinBtn').onclick=async()=>{const p=$('pin').value.trim();if(!p)return;$('pinBtn').disabled=true;
+  try{await rpc('bride_ping',{p_pin:p});PIN=p;ls.set('b_pin',p);$('pin').value='';$('pinErr').hidden=true;$('pinBox').hidden=true;$('app').hidden=false;load()}
+  catch(e){$('pinErr').textContent=/locked/.test(e.message)?'محاولات كثيرة، انتظري 10 دقائق':/bad_pin/.test(e.message)?'الرقم غير صحيح':'تعذّر الاتصال';$('pinErr').hidden=false}
+  $('pinBtn').disabled=false};
+$('pin').onkeydown=e=>{if(e.key==='Enter')$('pinBtn').click()};
+if(PIN){$('pinBox').hidden=true;$('app').hidden=false;load()}
+setInterval(()=>{if(PIN&&!document.hidden)load()},15000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)load()});
+</script>
+</body>
+</html>

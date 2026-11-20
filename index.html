@@ -500,6 +500,12 @@ details.more .item{margin:0 0 10px}
         <div class="manual"><input id="spIn" inputmode="numeric" maxlength="8" placeholder="رقم جديد" dir="ltr"><button class="btn" id="spBtn">حفظ</button></div>
       </div>
       <div class="box">
+        <h3 style="margin:0 0 6px;color:var(--burg)">الرقم السري للعروسة</h3>
+        <p class="note">يفتح صفحة «دعوات العروسة» فقط: ترسل منها دعوات خاصة لصديقاتها وترى من أكّدت. لا يفتح الإدارة ولا الفحص. من 4 إلى 8 أرقام.</p>
+        <div class="manual"><input id="bpIn" inputmode="numeric" maxlength="8" placeholder="رقم جديد" dir="ltr"><button class="btn" id="bpBtn">حفظ</button></div>
+        <a class="btn sec" style="margin-top:10px" href="https://ab0jwad.github.io/gomrah/bride/" target="_blank" rel="noopener">فتح صفحة العروسة</a>
+      </div>
+      <div class="box">
         <h3 style="margin:0 0 6px;color:var(--burg)">نص رسالة الدعوة</h3>
         <p class="note">هذه رسالة الإرسال الجماعي (رابط واحد للكل). أرسليها لمن تريدين دفعة واحدة. <b>لا يؤكد الحضور إلا من رقم جوالها مسجّل</b> في «الدعوات» ← «الدعوة الجماعية: قائمة المدعوات بأرقامهن»، ومن يصلها الرابط من غيرها يظهر لها: «هذا الرقم غير مسجّل… تواصلي مع صاحبة الدعوة».</p>
         <textarea id="invTxt" rows="9" style="width:100%;font:inherit;font-size:15px;line-height:1.8;padding:12px;border-radius:12px;border:2px solid var(--line);background:#fff;color:var(--ink);margin-top:8px"></textarea>
@@ -13124,7 +13130,7 @@ $('lMake').onclick=async e=>{if(lBusy)return;const lab=$('lLabel').value.trim();
   try{const r=await rpc('admin_link_create2',{p_pin:PIN,p_label:lab,p_max:lComp,p_token:lPendTok});if(!r.ok){toast('تعذّر إنشاء الرابط');return}
     lPendTok=null;
     const l={token:r.token,label:lab,max_comp:lComp};lastLinks[r.token]=l;
-    $('lRes').innerHTML=`<div class="msg ok">جاهز${lab?' لـ'+esc(lab):''}${lComp>0?' — مع '+compWord(lComp):''}. اختاري الضيفة في الواتساب وأرسلي.</div>`+linkActs(l);
+    $('lRes').innerHTML=`<div class="msg ok">جاهز${lab?' لـ'+esc(lab):''}${lComp>0?' — مع '+compUpTo(lComp):''}. اختاري الضيفة في الواتساب وأرسلي.</div>`+linkActs(l);
     $('lLabel').value='';setLComp(0);load()}catch(e){toast('تعذّر الاتصال')}finally{lBusy=false;$('lMake').disabled=false}};
 const lastLinks={};
 function findLink(tk){return lastLinks[tk]||((linkData||[]).find(x=>x.token===tk))}
@@ -13140,7 +13146,7 @@ function renderLinks(){const L=linkData||[];const n={all:L.length,new:0,yes:0,cx
   document.querySelectorAll('#lfilters button').forEach(b=>{if(!b.dataset.l)b.dataset.l=b.textContent;b.textContent=b.dataset.l+' ('+(n[b.dataset.f]||0)+')'});
   const q=$('lq').value.trim();
   const items=L.filter(l=>(lfilt==='all'||linkState(l)===lfilt)&&(!q||(l.label||'').includes(q)||(l.card_name||'').includes(q)||(l.used_phone||'').includes(normPhone(q)||'@')));
-  $('lrows').innerHTML=items.map(l=>{const st=linkState(l);const ch=[];
+  $('lrows').innerHTML=items.map(l=>{const st=linkState(l);const ch=[];if(l.by_bride)ch.push('<span class="chip" style="background:#f6e3e6;color:#7a1d22">من العروسة</span>');
     ch.push(l.max_comp>0?`<span class="chip in" style="background:#eef0e4;color:#55623a">مسموح ${l.max_comp} مرافق</span>`:'<span class="chip">بدون مرافقين</span>');
     if(st==='yes')ch.push(`<span class="chip in">أكّدت: ${esc(l.card_name)}${l.card_comp>0?' مع '+l.card_comp:''}${l.entered?' · دخلت':''}</span>`);
     else if(st==='cx')ch.push(`<span class="chip cx">ألغت: ${esc(l.card_name||'')}</span>`);
@@ -13233,6 +13239,8 @@ $('logout').onclick=()=>{ls.del(PKEY);PIN='';showPin()};
 $('myBtn').onclick=async()=>{const n=$('myNew').value.trim(),n2=$('myNew2').value.trim();
   if(!/^[0-9]{4,8}$/.test(n)){toast('اكتبي من 4 إلى 8 أرقام');return}if(n!==n2){toast('الرقمان غير متطابقين');return}
   try{const r=await rpc('admin_set_own_pin',{p_pin:PIN,p_new:n});if(r.ok){PIN=n;ls.set(PKEY,n);$('myNew').value='';$('myNew2').value='';toast('تم تغيير رقمكِ السري')}else toast(pinMsg[r.err]||'الرقم غير مقبول')}catch(e){toast('تعذّر الاتصال')}};
+$('bpBtn').onclick=async()=>{const n=$('bpIn').value.trim();if(!/^[0-9]{4,8}$/.test(n)){toast('اكتب من 4 إلى 8 أرقام');return}
+  try{const r=await rpc('admin_set_bride_pin',{p_pin:PIN,p_new:n});if(r.ok){toast('تم حفظ رقم العروسة');$('bpIn').value=''}else toast(r.err==='same'?'لا يكون نفس رقم أم العروسة أو الموظفة':(pinMsg[r.err]||'الرقم غير مقبول'))}catch(e){toast('تعذّر الاتصال')}};
 $('spBtn').onclick=async()=>{const n=$('spIn').value.trim();if(!/^[0-9]{4,8}$/.test(n)){toast('اكتب من 4 إلى 8 أرقام');return}
   try{const r=await rpc('admin_set_staff_pin',{p_pin:PIN,p_new:n});if(r.ok){toast('تم حفظ رقم الموظفة');$('spIn').value=''}else toast(pinMsg[r.err]||'الرقم غير مقبول')}catch(e){toast('تعذّر الاتصال')}};
 

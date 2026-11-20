@@ -410,19 +410,19 @@ details.more .item{margin:0 0 10px}
     </section>
     <section id="v-inv" hidden>
       <div class="box" id="reqBox">
-        <h3 style="margin:0 0 6px;color:var(--burg)">الدعوة الجماعية — طلبات الحضور</h3>
-        <p class="note">أرسلي الرسالة لمن تريدين من الواتساب. من يصلها الرابط تكتب اسمها وجوالها، فيصل طلبها هنا، ولا تأخذ بطاقة إلا بعد «قبول».</p>
+        <h3 style="margin:0 0 6px;color:var(--burg)">الدعوة الجماعية</h3>
+        <p class="note">اضغطي «إرسال واتساب» واختاري المدعوين. كل من يصلها الرابط تكتب اسمها وجوالها وتأخذ بطاقتها مباشرة، وتُضاف تلقائياً إلى قائمة المدعوين.</p>
         <div class="row2" style="margin-top:8px">
           <a class="btn" id="reqWa" target="_blank" rel="noopener"><svg class="ic" aria-hidden="true"><use href="#i-wa"/></svg> إرسال واتساب</a>
           <button class="btn sec" id="reqCopy"><svg class="ic" aria-hidden="true"><use href="#i-copy"/></svg> نسخ الدعوة</button>
         </div>
-        <label class="chk" style="margin-top:12px"><input type="checkbox" id="gOpen"> استقبال طلبات من الرابط العام (بموافقتي)</label>
-        <div class="filters" id="rfilters" style="margin-top:10px">
+        <label class="chk" style="margin-top:12px" hidden><input type="checkbox" id="gOpen"> استقبال طلبات من الرابط العام (بموافقتي)</label>
+        <div class="filters" id="rfilters" style="margin-top:10px" hidden>
           <button data-f="pending" class="on">بانتظار الموافقة</button>
           <button data-f="approved">مقبولة</button>
           <button data-f="rejected">مرفوضة</button>
         </div>
-        <div id="reqRows"></div>
+        <div id="reqRows" hidden></div>
       </div>
       <div class="box">
         <h3 style="margin:0 0 6px;color:var(--burg)">إرسال دعوة</h3>
@@ -433,7 +433,7 @@ details.more .item{margin:0 0 10px}
         <button class="btn" id="lMake" style="margin-top:12px"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg> إنشاء رابط الدعوة</button>
         <div id="lRes"></div>
       </div>
-      <div class="box" id="iModeBox2">
+      <div class="box" id="iModeBox2" hidden>
         <label class="chk"><input type="checkbox" id="iOnly"> الدعوة للمدعوين فقط</label>
         <p class="note" id="iOnlyNote"></p>
       </div>
@@ -447,9 +447,9 @@ details.more .item{margin:0 0 10px}
       </div>
       <div id="lrows"></div>
       <details class="box more">
-        <summary>الدعوة الجماعية: قائمة المدعوات بأرقامهن</summary>
+        <summary>قائمة المدعوات بأرقامهن</summary>
       <div>
-        <p class="note">١) أضيفي المدعوات بأسمائهن وأرقامهن (واحدة واحدة أو قائمة دفعة واحدة).<br>٢) أرسلي رسالة الدعوة الجماعية للكل.<br>من رقمها في القائمة تؤكد وتأخذ بطاقتها، ومن وصلها الرابط من غيرها لا تقدر تؤكد.</p>
+        <p class="note">هنا تقدرين تضيفين مدعوات بأسمائهن وأرقامهن مسبقاً، وتحددين عدد المرافقين المسموح لكل واحدة.</p>
         <div class="row2" style="margin-top:8px">
           <button class="btn" id="bulkCopy"><svg class="ic" aria-hidden="true"><use href="#i-copy"/></svg> نسخ الدعوة الجماعية</button>
           <a class="btn sec" id="bulkWa" target="_blank" rel="noopener"><svg class="ic" aria-hidden="true"><use href="#i-wa"/></svg> إرسال واتساب</a>
@@ -523,7 +523,7 @@ details.more .item{margin:0 0 10px}
       </div>
       <div class="box">
         <h3 style="margin:0 0 6px;color:var(--burg)">نص رسالة الدعوة</h3>
-        <p class="note">هذه رسالة الإرسال الجماعي (رابط واحد للكل). أرسليها لمن تريدين دفعة واحدة. <b>لا يؤكد الحضور إلا من رقم جوالها مسجّل</b> في «الدعوات» ← «الدعوة الجماعية: قائمة المدعوات بأرقامهن»، ومن يصلها الرابط من غيرها يظهر لها: «هذا الرقم غير مسجّل… تواصلي مع صاحبة الدعوة».</p>
+        <p class="note">هذه رسالة الإرسال الجماعي (رابط واحد للكل). أرسليها لمن تريدين دفعة واحدة. كل من يصلها الرابط تكتب اسمها وجوالها وتأخذ بطاقتها، وتُضاف إلى قائمة المدعوين.</p>
         <textarea id="invTxt" rows="9" style="width:100%;font:inherit;font-size:15px;line-height:1.8;padding:12px;border-radius:12px;border:2px solid var(--line);background:#fff;color:var(--ink);margin-top:8px"></textarea>
         <div class="row2">
           <button class="btn" id="copyInv"><svg class="ic" aria-hidden="true"><use href="#i-copy"/></svg> نسخ الدعوة</button>
@@ -12957,7 +12957,7 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
 const API='https://rhjpblazeuksqzlhdomn.supabase.co/rest/v1/rpc/', KEY='sb_publishable_aXvh7LsChsFkF_7cirPDpA_cUMgtYWs';
 const GUEST_URL='https://ab0jwad.github.io/gomrah/';
 const MAPS='https://maps.app.goo.gl/qinSGP4HHEeGfou36';
-const APP_VER='1795175470';
+const APP_VER='1795176308';
 (function(){try{fetch('version.txt?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():'').then(v=>{v=(v||'').trim();if(!v||v===APP_VER)return;
   let k='rl_'+v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,'1')}catch(e){}
   const u=new URL(location.href);u.searchParams.set('v',v);location.replace(u.toString())}).catch(()=>{})}catch(e){}})();
@@ -13138,7 +13138,7 @@ function renderList(){
   items=data.cards.filter(c=>{
     if(q&&!((c.name||'').includes(q)||(c.phone||'').includes(normPhone(q)||'@')||pad(c.no).includes(q)))return false;
     switch(filt){case'taken':return c.status==='taken';case'comp':return c.status==='taken'&&c.companions>0;case'in':return c.status==='taken'&&c.entered_at;case'wait':return c.status==='taken'&&!c.entered_at;case'norem':return c.status==='taken'&&!c.reminded_at&&!c.entered_at;case'rem':return c.status==='taken'&&!!c.reminded_at;case'cx':return c.status==='cancelled'}return true});
-  $('rows').innerHTML=items.map(c=>{const ch=[];if(c.status==='cancelled')ch.push('<span class="chip cx">ملغاة</span>');if(c.entered_at)ch.push('<span class="chip in">دخلت</span>');if(c.status==='taken'&&!c.entered_at)ch.push(c.reminded_at?'<span class="chip rm">✓ ذُكّرت '+fmtT(c.reminded_at)+'</span>':'<span class="chip" style="background:#fff4e0;color:#9a5b00">لم تُذكَّر</span>');if(c.companions>0)ch.push('<span class="chip in" style="background:#eef0e4;color:#55623a">+'+c.companions+' مرافق</span>');if(invData&&c.status==='taken'&&!invPhones().has(c.phone))ch.push('<span class="chip cx">ليست في قائمة المدعوين</span>');
+  $('rows').innerHTML=items.map(c=>{const ch=[];if(c.status==='cancelled')ch.push('<span class="chip cx">ملغاة</span>');if(c.entered_at)ch.push('<span class="chip in">دخلت</span>');if(c.status==='taken'&&!c.entered_at)ch.push(c.reminded_at?'<span class="chip rm">✓ ذُكّرت '+fmtT(c.reminded_at)+'</span>':'<span class="chip" style="background:#fff4e0;color:#9a5b00">لم تُذكَّر</span>');if(c.companions>0)ch.push('<span class="chip in" style="background:#eef0e4;color:#55623a">+'+c.companions+' مرافق</span>');if(c.status==='taken')ch.push('<span class="chip in">في قائمة المدعوين</span>');
     const a=[];if(c.status==='taken'){a.push(`<button data-a="comp_dec" data-n="${c.no}" data-q="1"><svg class="ic" aria-hidden="true"><use href="#i-minus"/></svg> مرافق</button>`);a.push(`<button data-a="comp_inc" data-n="${c.no}" data-q="1"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg> مرافق</button>`)}
     if(c.status==='taken'&&!c.entered_at)a.push(`<button data-a="manual_in" data-n="${c.no}"><svg class="ic" aria-hidden="true"><use href="#i-door"/></svg> دخول يدوي</button>`);
     if(c.status==='taken'&&c.bound)a.push(`<button data-a="release" data-n="${c.no}"><svg class="ic" aria-hidden="true"><use href="#i-unlink"/></svg> فك ربط الجوال</button>`);

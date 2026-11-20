@@ -85,9 +85,9 @@ async function run(){results.length=0;['g1','g2','g3','g4'].forEach(g=>$(g).inne
   catch(e){row('g2','bad','قاعدة البيانات لا تستجيب','الضيوف سيرون «تعذّر الاتصال». '+e.message)}
   const dev='devcheck-'+Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2);
   try{const g=await rpc('guest_gate',{p_token:null,p_device:dev});
-    row('g2',g.open?'ok':'bad','الرابط العام يفتح للضيوف',g.open?(g.list?'يُطلب رقم الجوال، ولا يؤكد إلا من رقمها في قائمة المدعوات':'مفتوح للجميع (خيار «للمدعوين فقط» غير مفعّل)'):'مقفول')}
+    row('g2',g.open?'ok':'bad','الرابط العام يفتح للضيوف',g.open?(g.list?'يُطلب رقم الجوال، ولا يؤكد إلا من رقمها في قائمة المدعوات':'تظهر خانة الاسم والجوال للضيف'):'مقفول')}
   catch(e){row('g2','bad','الرابط العام','تعذّر الفحص')}
-  try{const g=await rpc('guest_gate',{p_token:'ZZZZZZZ',p_device:dev});row('g2',!g.open&&g.why==='bad_link'?'ok':'bad','الرابط المزيّف يُرفض',!g.open?'يظهر: «هذا الرابط غير صالح… تواصلي مع صاحبة الدعوة»':'فتح! يحتاج مراجعة')}
+  try{const g=await rpc('guest_gate',{p_token:'ZZZZZZZ',p_device:dev});row('g2',(g.open&&!g.only)||(!g.open&&g.why==='bad_link')?'ok':'bad','رابط برمز قديم أو مزيّف',g.open?'يفتح كالرابط العام (لا يُقفل على الضيف)':'يُرفض')}
   catch(e){row('g2','bad','الرابط المزيّف','تعذّر الفحص')}
   // keep-alive
   try{const r=await fetch('https://api.github.com/repos/ab0jwad/gomrah/actions/workflows/keepalive.yml/runs?per_page=5',{cache:'no-store'});const j=await r.json();
@@ -108,8 +108,7 @@ async function health(){const PIN=ls.get('dev_pin');$('nums').hidden=true;if(!PI
     row('g4',h.admin_pin_default?'warn':'ok','الرقم السري لأم العروسة',h.admin_pin_default?'ما زال الرقم الافتراضي 123456 — غيّريه من «المزيد» قبل المناسبة':'مُغيَّر عن الافتراضي');
     row('g4',h.staff_pin_default?'warn':'ok','الرقم السري للموظفة',h.staff_pin_default?'ما زال الافتراضي 654321 — غيّريه من «المزيد»':'مُغيَّر عن الافتراضي');
     row('g4',h.bride_pin_set?'ok':'warn','الرقم السري للعروسة',h.bride_pin_set?'موجود':'غير مضبوط');
-    row('g4',h.invite_only?'ok':'warn','الدعوة للمدعوين فقط',h.invite_only?'مفعّل':'غير مفعّل — أي شخص يفتح الرابط العام يقدر يأخذ بطاقة');
-    row('g4','ok','الدعوة الجماعية (الرابط العام)',!h.invite_only?'مفتوحة للجميع بدون موافقة':h.general_open?'تصل طلبات وتحتاج موافقة أم العروسة — بانتظار الموافقة: '+h.requests_pending:'لا تؤكد إلا الأرقام المسجّلة في القائمة');
+    row('g4','ok','الدعوة الجماعية (الرابط العام)',!h.invite_only?'كل من يصله الرابط يسجّل ويأخذ بطاقته ويُضاف لقائمة المدعوين':h.general_open?'تصل طلبات وتحتاج موافقة أم العروسة — بانتظار الموافقة: '+h.requests_pending:'لا تؤكد إلا الأرقام المسجّلة في القائمة');
     row('g4',h.overbooked?'bad':'ok','العدد',h.overbooked?'المؤكدون أكثر من العدد المسموح!':'المؤكدون '+h.persons+' من '+h.capacity);
     if(h.fail_count>=5)row('g4','warn','محاولات رقم سري خاطئة',h.fail_count+' محاولة خلال آخر 10 دقائق');
     const N=[['persons','أشخاص مؤكدون'],['capacity','العدد المسموح'],['cards_taken','بطاقات مؤكدة'],['entered','دخلن'],['links_active','روابط خاصة فعّالة'],['links_used','روابط فُتحت'],['links_bride','من العروسة'],['list_invites','في قائمة الأرقام'],['requests_pending','طلبات بانتظار الموافقة'],['declines','اعتذرن']];

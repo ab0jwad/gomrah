@@ -300,6 +300,7 @@ details.more .item{margin:0 0 10px}
     <!-- form -->
     <div class="box" id="gForm">
       <p class="formt">تأكيد الحضور</p>
+      <p class="note" id="gListNote" hidden>اكتبي رقم جوالكِ نفسه الذي وصلتكِ عليه الدعوة.</p>
       <label for="gName">الاسم</label>
       <input id="gName" autocomplete="name" placeholder="مثال: أم محمد">
       <label for="gPhone">رقم الجوال</label>
@@ -432,7 +433,14 @@ details.more .item{margin:0 0 10px}
       </div>
       <div id="lrows"></div>
       <details class="box more">
-        <summary>طريقة أخرى: الإضافة برقم الجوال</summary>
+        <summary>الدعوة الجماعية: قائمة المدعوات بأرقامهن</summary>
+      <div>
+        <p class="note">١) أضيفي المدعوات بأسمائهن وأرقامهن (واحدة واحدة أو قائمة دفعة واحدة).<br>٢) أرسلي رسالة الدعوة الجماعية للكل.<br>من رقمها في القائمة تؤكد وتأخذ بطاقتها، ومن وصلها الرابط من غيرها لا تقدر تؤكد.</p>
+        <div class="row2" style="margin-top:8px">
+          <button class="btn" id="bulkCopy"><svg class="ic" aria-hidden="true"><use href="#i-copy"/></svg> نسخ الدعوة الجماعية</button>
+          <a class="btn sec" id="bulkWa" target="_blank" rel="noopener"><svg class="ic" aria-hidden="true"><use href="#i-wa"/></svg> إرسال واتساب</a>
+        </div>
+      </div>
       <div>
         <h3 style="margin:10px 0 6px;color:var(--burg)">إضافة مدعوة</h3>
         <label for="iName">الاسم</label><input id="iName" autocomplete="off">
@@ -495,14 +503,14 @@ details.more .item{margin:0 0 10px}
       </div>
       <div class="box">
         <h3 style="margin:0 0 6px;color:var(--burg)">نص رسالة الدعوة</h3>
-        <p class="note">هنا تعدّلين نص الرسالة فقط. الإرسال يكون من تبويب <b>«الدعوات» ← «إنشاء رابط الدعوة»</b>، فيُضاف لكل ضيفة رابطها الخاص تلقائياً مكان الرابط.</p>
+        <p class="note">هذه رسالة الإرسال الجماعي (رابط واحد للكل). أرسليها لمن تريدين دفعة واحدة. <b>لا يؤكد الحضور إلا من رقم جوالها مسجّل</b> في «الدعوات» ← «الدعوة الجماعية: قائمة المدعوات بأرقامهن»، ومن يصلها الرابط من غيرها يظهر لها: «هذا الرقم غير مسجّل… تواصلي مع صاحبة الدعوة».</p>
         <textarea id="invTxt" rows="9" style="width:100%;font:inherit;font-size:15px;line-height:1.8;padding:12px;border-radius:12px;border:2px solid var(--line);background:#fff;color:var(--ink);margin-top:8px"></textarea>
-        <div class="row2" hidden>
+        <div class="row2">
           <button class="btn" id="copyInv"><svg class="ic" aria-hidden="true"><use href="#i-copy"/></svg> نسخ الدعوة</button>
           <a class="btn sec" id="waInv" target="_blank" rel="noopener"><svg class="ic" aria-hidden="true"><use href="#i-wa"/></svg> إرسال واتساب</a>
         </div>
         <button class="btn sec" id="resetInv" style="margin-top:10px;font-size:14px;padding:10px">إرجاع النص الأصلي</button>
-        <button class="btn" id="goInv" style="margin-top:10px">الذهاب إلى «الدعوات» للإرسال</button>
+        <button class="btn" id="goInv" style="margin-top:10px">قائمة المدعوات بأرقامهن</button>
       </div>
       <div class="box">
         <h3 style="margin:0 0 6px;color:var(--burg)">إضافة ضيفة يدوياً</h3>
@@ -13005,6 +13013,7 @@ async function guestInit(){
   $('guest').hidden=false;tick();setInterval(tick,1000);$('gName').value=gName;$('gPhone').value=gPhone;
   let gate=null;try{gate=await rpc('guest_gate',{p_token:TOKEN||null,p_device:gDev})}catch(e){gate=null}
   if(gate&&!gate.open){$('guest').classList.add('locked');$('gLocked').hidden=false;$('gLockedT').textContent=LOCK_MSG[gate.why]||LOCK_MSG.private;return}
+  if(gate&&gate.list&&!TOKEN)$('gListNote').hidden=false;
   musicInit();
   if(gPhone){try{const r=await rpc('guest_my_card2',{p_phone:gPhone,p_device:gDev});if(r.ok){r.existing=true;await gShowCard(r)}}catch(e){}}
 }
@@ -13012,7 +13021,7 @@ function gRead(needName){const nm=$('gName').value.trim(),ph=$('gPhone').value.t
   if(needName&&nm.length<2){gErr('اكتبي الاسم');return null}
   if(normPhone(ph).length<11){gErr('اكتبي رقم الجوال كاملاً، مثل 05xxxxxxxx');return null}
   gErr('');return{nm,ph}}
-const NOT_INV='عذراً، هذه الدعوة خاصة بالمدعوين. اكتبي رقم الجوال نفسه الذي وصلتكِ عليه الدعوة، أو تواصلي مع صاحبة الدعوة.';
+const NOT_INV='عذراً، هذا الرقم غير مسجّل في قائمة المدعوات. الدعوة خاصة؛ اكتبي رقم الجوال نفسه الذي وصلتكِ عليه الدعوة، أو تواصلي مع صاحبة الدعوة.';
 async function gClaim(comp){const v=gRead(true);if(!v)return;const b=$('gYes');b.disabled=true;
   try{const r=await rpc('guest_claim3',{p_name:v.nm,p_phone:v.ph,p_device:gDev,p_comp:comp,p_token:TOKEN||null});
     if(r.ok){$('gPick').hidden=true;if(!r.same_device){gPhone=v.ph;gName=v.nm;ls.set('g_phone',v.ph);ls.set('g_name',v.nm)}else{gName=r.name;ls.set('g_name',r.name)}await gShowCard(r)}
@@ -13180,7 +13189,7 @@ $('iq').oninput=()=>renderInv();
 function invState(i){return i.card_no?'yes':i.declined?'no':i.sent_at?'waiting':'unsent'}
 function renderInv(){const L=invData.invites||[];
   $('iOnly').checked=!!invData.invite_only;
-  $('iOnlyNote').textContent=invData.invite_only?'مفعّل: الدعوة تفتح فقط من رابط خاص أرسلتِه، أو لرقم أضفتِه في القائمة. الرابط العام بدون رمز يظهر عليه «دعوة خاصة».':'غير مفعّل: أي شخص يفتح الرابط العام يقدر يأخذ بطاقة. فعّليه حتى لا تفتح الدعوة إلا لمن أرسلتِ له.';
+  $('iOnlyNote').textContent=invData.invite_only?'مفعّل: يؤكد الحضور فقط من فتحت رابطاً خاصاً أرسلتِه لها، أو من رقمها في «قائمة المدعوات بأرقامهن». غيرهن يظهر لهن أن الدعوة خاصة.':'غير مفعّل: أي شخص يفتح الرابط العام يقدر يأخذ بطاقة. فعّليه حتى لا تفتح الدعوة إلا لمن أرسلتِ له.';
   const n={all:L.length,unsent:0,waiting:0,yes:0,no:0};L.forEach(i=>n[invState(i)]++);
   document.querySelectorAll('#ifilters button').forEach(b=>{if(!b.dataset.l)b.dataset.l=b.textContent;b.textContent=b.dataset.l+' ('+(n[b.dataset.f]||0)+')'});
   const q=$('iq').value.trim();
@@ -13205,11 +13214,12 @@ $('irows').onclick=async e=>{const a=e.target.closest('a[data-sent]');if(a){rpc(
     load()}catch(err){toast('تعذّر الاتصال')}};
 const INV_DEFAULT='حياكم الله 🌸\nيسعدنا دعوتكم لحضور مناسبة غمرة دانة\n📅 يوم السبت 18/06/1448هـ الموافق 28/11/2026م\n📍 موقع القاعة: '+MAPS+'\n\nلتأكيد الحضور أو الاعتذار واستلام بطاقة الدخول، افتحوا الرابط:\n'+GUEST_URL+'\n\nنرجو التأكيد مبكراً 🤍';
 function invText(){let t=$('invTxt').value.trim()||INV_DEFAULT;if(!t.includes(GUEST_URL))t+='\n'+GUEST_URL;return t}
-function invSync(){$('waInv').href='https://wa.me/?text='+encodeURIComponent(invText())}
+function invSync(){const h='https://wa.me/?text='+encodeURIComponent(invText());$('waInv').href=h;$('bulkWa').href=h}
 $('invTxt').value=ls.get('inv_txt')||INV_DEFAULT;invSync();
 $('invTxt').oninput=()=>{ls.set('inv_txt',$('invTxt').value);invSync()};
-$('goInv').onclick=()=>{sView('inv');window.scrollTo({top:0,behavior:'smooth'})};
+$('goInv').onclick=()=>{sView('inv');const d=document.querySelector('#v-inv details.more');if(d){d.open=true;setTimeout(()=>d.scrollIntoView({behavior:'smooth',block:'start'}),50)}};
 $('resetInv').onclick=()=>{$('invTxt').value=INV_DEFAULT;ls.del('inv_txt');invSync();toast('رجع النص الأصلي')};
+$('bulkCopy').onclick=()=>$('copyInv').onclick();
 $('copyInv').onclick=async()=>{const t=invText();try{await navigator.clipboard.writeText(t);toast('نُسخت الدعوة مع الرابط')}catch(e){$('invTxt').focus();$('invTxt').select();toast('انسخ النص المحدد')}};
 $('capBtn').onclick=async()=>{const n=parseInt($('capIn').value,10);if(!(n>0)){toast('اكتب رقماً صحيحاً');return}
   try{const r=await rpc('admin_action',{p_pin:PIN,p_action:'set_cap',p_no:n});

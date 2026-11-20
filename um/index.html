@@ -309,6 +309,7 @@ details.more .item{margin:0 0 10px}
         <button class="btn" id="gYes"><svg class="ic" aria-hidden="true"><use href="#i-ok"/></svg> سأحضر</button>
         <button class="btn sec" id="gNo"><svg class="ic" aria-hidden="true"><use href="#i-no"/></svg> أعتذر</button>
       </div>
+      <div class="msg ok" id="gOk" hidden></div>
       <div class="msg err" id="gErr" hidden></div>
       <div class="pick" id="gPick" hidden>
         <p class="pickt" id="gPickT"></p>
@@ -410,6 +411,21 @@ details.more .item{margin:0 0 10px}
       <p class="note" style="text-align:center;color:var(--sand)">تتحدث تلقائياً كل 5 ثوانٍ</p>
     </section>
     <section id="v-inv" hidden>
+      <div class="box" id="reqBox">
+        <h3 style="margin:0 0 6px;color:var(--burg)">الدعوة الجماعية — طلبات الحضور</h3>
+        <p class="note">أرسلي الرسالة لمن تريدين من الواتساب. من يصلها الرابط تكتب اسمها وجوالها، فيصل طلبها هنا، ولا تأخذ بطاقة إلا بعد «قبول».</p>
+        <div class="row2" style="margin-top:8px">
+          <a class="btn" id="reqWa" target="_blank" rel="noopener"><svg class="ic" aria-hidden="true"><use href="#i-wa"/></svg> إرسال واتساب</a>
+          <button class="btn sec" id="reqCopy"><svg class="ic" aria-hidden="true"><use href="#i-copy"/></svg> نسخ الدعوة</button>
+        </div>
+        <label class="chk" style="margin-top:12px"><input type="checkbox" id="gOpen"> استقبال طلبات من الرابط العام (بموافقتي)</label>
+        <div class="filters" id="rfilters" style="margin-top:10px">
+          <button data-f="pending" class="on">بانتظار الموافقة</button>
+          <button data-f="approved">مقبولة</button>
+          <button data-f="rejected">مرفوضة</button>
+        </div>
+        <div id="reqRows"></div>
+      </div>
       <div class="box">
         <h3 style="margin:0 0 6px;color:var(--burg)">إرسال دعوة</h3>
         <p class="note">كل ضغطة تُنشئ رابطاً خاصاً لضيفة واحدة. يُستخدم من جوال واحد فقط، فإذا أُعيد إرساله لغيرها لا يفتح.</p>
@@ -12957,7 +12973,8 @@ let gDev=ls.get('g_dev');if(!gDev){const a=new Uint8Array(16);crypto.getRandomVa
 const OTHER_DEV='هذه البطاقة مسجّلة على جوال آخر. إذا غيّرتِ جوالكِ، تواصلي مع صاحبة الدعوة.';
 async function gStatus(){return null}
 function gShow(which){['gForm','gCard','gDone'].forEach(id=>$(id).hidden=id!==which)}
-function gErr(t){const e=$('gErr');e.textContent=t;e.hidden=!t}
+function gErr(t){const e=$('gErr');e.textContent=t;e.hidden=!t;if(t)$('gOk').hidden=true}
+function gOk(t){const e=$('gOk');e.textContent=t;e.hidden=!t;if(t)$('gErr').hidden=true}
 const heroReady=new Promise(res=>{const i=$('heroImg');if(i.complete&&i.naturalWidth)res(i);else{i.onload=()=>res(i);i.onerror=()=>res(null)}});
 async function renderCard(no,code,name,comp){
   const hero=await heroReady;const W=956,H=1600;const c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
@@ -13019,7 +13036,9 @@ async function guestInit(){
   $('guest').hidden=false;tick();setInterval(tick,1000);$('gName').value=gName;$('gPhone').value=gPhone;
   let gate=null;try{gate=await rpc('guest_gate',{p_token:TOKEN||null,p_device:gDev})}catch(e){gate=null}
   if(gate&&!gate.open){$('guest').classList.add('locked');$('gLocked').hidden=false;$('gLockedT').textContent=LOCK_MSG[gate.why]||LOCK_MSG.private;return}
-  if(gate&&gate.list&&!TOKEN)$('gListNote').hidden=false;
+  if(gate&&gate.only&&gate.general_open&&!TOKEN){$('gListNote').textContent='اكتبي اسمكِ ورقم جوالكِ واضغطي «سأحضر»، ويصل طلبكِ لصاحبة الدعوة للموافقة.';$('gListNote').hidden=false}
+  else if(gate&&gate.list&&!TOKEN)$('gListNote').hidden=false;
+  if(!TOKEN&&!gPhone)reqCheck();
   musicInit();
   if(gPhone){try{const r=await rpc('guest_my_card2',{p_phone:gPhone,p_device:gDev});if(r.ok){r.existing=true;await gShowCard(r)}}catch(e){}}
 }
@@ -13027,12 +13046,22 @@ function gRead(needName){const nm=$('gName').value.trim(),ph=$('gPhone').value.t
   if(needName&&nm.length<2){gErr('اكتبي الاسم');return null}
   if(normPhone(ph).length<11){gErr('اكتبي رقم الجوال كاملاً، مثل 05xxxxxxxx');return null}
   gErr('');return{nm,ph}}
+const REQ_SENT='وصل طلبكِ لصاحبة الدعوة 🤍 بعد موافقتها افتحي هذا الرابط مرة أخرى واضغطي «سأحضر» لتستلمي بطاقتكِ.';
+const REQ_NO='نعتذر، الدعوة خاصة بالمدعوات. تواصلي مع صاحبة الدعوة.';
+async function reqCheck(){const ph=ls.get('g_req_phone');if(!ph)return;$('gPhone').value=ph;$('gName').value=ls.get('g_req_name')||$('gName').value;
+  try{const r=await rpc('guest_request_status',{p_phone:ph,p_device:gDev});
+    if(r.status==='pending')gOk(REQ_SENT);
+    else if(r.status==='approved')gOk('تمت الموافقة على حضوركِ 🌸 اضغطي «سأحضر» لتستلمي بطاقتكِ.');
+    else if(r.status==='rejected')gErr(REQ_NO);
+    else ls.del('g_req_phone')}catch(e){}}
 const NOT_INV='عذراً، هذا الرقم غير مسجّل في قائمة المدعوات. الدعوة خاصة؛ اكتبي رقم الجوال نفسه الذي وصلتكِ عليه الدعوة، أو تواصلي مع صاحبة الدعوة.';
 async function gClaim(comp){const v=gRead(true);if(!v)return;const b=$('gYes');b.disabled=true;
   try{const r=await rpc('guest_claim3',{p_name:v.nm,p_phone:v.ph,p_device:gDev,p_comp:comp,p_token:TOKEN||null});
-    if(r.ok){$('gPick').hidden=true;if(!r.same_device){gPhone=v.ph;gName=v.nm;ls.set('g_phone',v.ph);ls.set('g_name',v.nm)}else{gName=r.name;ls.set('g_name',r.name)}await gShowCard(r)}
+    if(r.ok){$('gPick').hidden=true;ls.del('g_req_phone');if(!r.same_device){gPhone=v.ph;gName=v.nm;ls.set('g_phone',v.ph);ls.set('g_name',v.nm)}else{gName=r.name;ls.set('g_name',r.name)}await gShowCard(r)}
     else if(r.err==='choose_comp')showPick(r.max);
     else if(r.err==='not_invited'){$('gPick').hidden=true;gErr(NOT_INV)}
+    else if(r.err==='pending'){$('gPick').hidden=true;ls.set('g_req_phone',v.ph);ls.set('g_req_name',v.nm);gOk(REQ_SENT)}
+    else if(r.err==='rejected'){$('gPick').hidden=true;gErr(REQ_NO)}
     else if(r.err==='link_used'){$('gPick').hidden=true;gErr(LOCK_MSG.used)}
     else if(r.err==='bad_link'){$('gPick').hidden=true;gErr(LOCK_MSG.bad_link)}
     else if(r.err==='other_device')gErr(OTHER_DEV);
@@ -13064,10 +13093,11 @@ $('gSave').onclick=async()=>{
 const HASH=(()=>{try{return decodeURIComponent(location.hash.replace('#',''))}catch(e){return location.hash.replace('#','')}})();
 const IS_ADMIN=['um','admin','أم-العروسة','ام-العروسة','أم_العروسة','ام_العروسة'].includes(HASH);
 const MODE=IS_ADMIN?'admin':'door';const PKEY=MODE==='admin'?'s_pin_admin':'s_pin_door';
+let reqData=null,rfilt='pending';const reqComp={};
 let PIN=ls.get(PKEY)||'', data=null, stats=null, invData=null, linkData=null, view='door';
 function sView(v){view=v;document.querySelectorAll('#sNav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));['door','stats','inv','list','more'].forEach(k=>$('v-'+k).hidden=k!==v);if(v!=='door')stopCam();render()}
 document.querySelectorAll('#sNav button').forEach(b=>b.onclick=()=>sView(b.dataset.v));
-async function load(){if(!PIN)return;try{stats=await rpc('staff_stats',{p_pin:PIN});if(MODE==='admin'){data=await rpc('admin_list',{p_pin:PIN});invData=await rpc('admin_invites',{p_pin:PIN});linkData=await rpc('admin_links',{p_pin:PIN});const sh=$('lRes').querySelector('[data-copy]');if(sh&&!linkData.some(x=>x.token===sh.dataset.copy))$('lRes').innerHTML=''}render()}catch(e){if(/bad_pin|locked|not_admin/.test(e.message)){ls.del(PKEY);PIN='';showPin(e.message==='locked'?'محاولات كثيرة، انتظري 10 دقائق':'الرقم السري غير صحيح')}}}
+async function load(){if(!PIN)return;try{stats=await rpc('staff_stats',{p_pin:PIN});if(MODE==='admin'){data=await rpc('admin_list',{p_pin:PIN});invData=await rpc('admin_invites',{p_pin:PIN});linkData=await rpc('admin_links',{p_pin:PIN});reqData=await rpc('admin_requests',{p_pin:PIN});const sh=$('lRes').querySelector('[data-copy]');if(sh&&!linkData.some(x=>x.token===sh.dataset.copy))$('lRes').innerHTML=''}render()}catch(e){if(/bad_pin|locked|not_admin/.test(e.message)){ls.del(PKEY);PIN='';showPin(e.message==='locked'?'محاولات كثيرة، انتظري 10 دقائق':'الرقم السري غير صحيح')}}}
 function showPin(err){$('recBox').hidden=true;$('forgotBtn').hidden=MODE!=='admin';$('pinBox').hidden=false;$('sNav').hidden=true;['door','stats','inv','list','more'].forEach(k=>$('v-'+k).hidden=true);$('pinErr').textContent=err||'';$('pinErr').hidden=!err}
 $('pinBtn').onclick=async()=>{const p=$('pin').value.trim();try{await rpc(MODE==='admin'?'admin_action':'staff_stats',MODE==='admin'?{p_pin:p,p_action:'ping'}:{p_pin:p});PIN=p;ls.set(PKEY,p);$('pinBox').hidden=true;$('sNav').hidden=false;sView(view);load()}catch(e){showPin(e.message==='locked'?'محاولات كثيرة، انتظري 10 دقائق':e.message==='not_admin'?'هذا رقم الموظفة، ولا يفتح صفحة الإدارة':'الرقم السري غير صحيح')}};
 $('pin').onkeydown=e=>{if(e.key==='Enter')$('pinBtn').click()};
@@ -13085,7 +13115,7 @@ function render(){
     $('sHdr').textContent='دخل '+s.in_persons+' · مؤكد '+s.persons+' / '+s.capacity+' شخصاً';
     const set=(id,v)=>{$(id).textContent=v};set('st_persons',s.persons);set('st_in',s.in_persons);set('st_wait',s.wait_persons);set('st_cards',s.cards);set('st_compc',s.comp_cards);set('st_comp',s.companions);set('st_cx',s.cancelled);set('st_dec',s.declines);set('st_cap',s.capacity);set('st_left',Math.max(0,s.capacity-s.persons));
     $('capInfo').textContent='العدد الحالي: '+s.capacity+' شخصاً — المؤكدون الآن: '+s.persons+' — المتبقي: '+Math.max(0,s.capacity-s.persons)}
-  if(MODE==='admin'&&data&&view==='list')renderList();if(MODE==='admin'&&invData&&view==='inv'){renderInv();if(linkData)renderLinks()}}
+  if(MODE==='admin'&&data&&view==='list')renderList();if(MODE==='admin'&&invData&&view==='inv'){renderInv();if(linkData)renderLinks()}else if(MODE==='admin'&&reqData)renderReq()}
 let filt='taken';
 document.querySelectorAll('#filters button').forEach(b=>b.onclick=()=>{filt=b.dataset.f;document.querySelectorAll('#filters button').forEach(x=>x.classList.toggle('on',x===b));renderList()});
 $('q').oninput=()=>renderList();
@@ -13193,7 +13223,31 @@ let ifilt='all';
 document.querySelectorAll('#ifilters button').forEach(b=>b.onclick=()=>{ifilt=b.dataset.f;document.querySelectorAll('#ifilters button').forEach(x=>x.classList.toggle('on',x===b));renderInv()});
 $('iq').oninput=()=>renderInv();
 function invState(i){return i.card_no?'yes':i.declined?'no':i.sent_at?'waiting':'unsent'}
-function renderInv(){const L=invData.invites||[];
+function approvedMsg(q){return 'حياكِ الله '+(q.name||'')+' 🌸\nتمت الموافقة على حضوركِ غمرة دانة يوم السبت 18/06/1448هـ الموافق 28/11/2026م.\nافتحي الرابط واضغطي «سأحضر» لتستلمي بطاقة الدخول:\n'+GUEST_URL}
+function renderReq(){if(!reqData)return;const I=reqData.items||[];$('gOpen').checked=!!reqData.general_open;
+  const n={pending:0,approved:0,rejected:0};I.forEach(q=>n[q.status]++);
+  document.querySelectorAll('#rfilters button').forEach(b=>{if(!b.dataset.l)b.dataset.l=b.textContent;b.textContent=b.dataset.l+' ('+n[b.dataset.f]+')'});
+  const nb=document.querySelector('#sNav [data-v="inv"]');if(nb){if(!nb.dataset.l)nb.dataset.l=nb.textContent;nb.textContent=nb.dataset.l+(n.pending?' ('+n.pending+')':'')}
+  $('reqRows').innerHTML=I.filter(q=>q.status===rfilt).map(q=>{const a=[];const ph=esc(showPh(q.phone));
+    if(q.status==='pending'){const k=reqComp[q.id]||0;
+      a.push(`<span class="ce small" style="display:inline-flex;gap:8px;align-items:center"><button data-rc="${q.id}" data-d="-1" type="button">−</button><b style="font-size:18px;min-width:22px">${k}</b><button data-rc="${q.id}" data-d="1" type="button">+</button><span class="note" style="margin:0">مرافق</span></span>`);
+      a.push(`<button data-ra="approve" data-id="${q.id}"><svg class="ic" aria-hidden="true"><use href="#i-ok"/></svg> قبول</button>`);
+      a.push(`<button data-ra="reject" data-id="${q.id}"><svg class="ic" aria-hidden="true"><use href="#i-no"/></svg> رفض</button>`)}
+    else{if(q.status==='approved')a.push(`<a target="_blank" rel="noopener" href="https://wa.me/${q.phone}?text=${encodeURIComponent(approvedMsg(q))}"><svg class="ic" aria-hidden="true"><use href="#i-wa"/></svg> أبلغيها بالموافقة</a>`);
+      a.push(`<button data-ra="undo" data-id="${q.id}"><svg class="ic" aria-hidden="true"><use href="#i-undo"/></svg> تراجع</button>`)}
+    const chip=q.status==='approved'?`<span class="chip in">مقبولة${q.max_comp>0?' +'+q.max_comp:''}</span>`:q.status==='rejected'?'<span class="chip cx">مرفوضة</span>':'<span class="chip" style="background:#fff4e0;color:#9a5b00">جديد</span>';
+    return `<div class="item"><div class="h"><span class="nm">${esc(q.name)}</span><span class="ph">${ph}</span>${chip}</div><div class="acts">${a.join('')}</div></div>`}).join('')||'<p class="note">لا يوجد.</p>'}
+document.querySelectorAll('#rfilters button').forEach(b=>b.onclick=()=>{rfilt=b.dataset.f;document.querySelectorAll('#rfilters button').forEach(x=>x.classList.toggle('on',x===b));renderReq()});
+$('reqRows').onclick=async e=>{const c=e.target.closest('[data-rc]');if(c){const id=c.dataset.rc;reqComp[id]=Math.max(0,Math.min(20,(reqComp[id]||0)+(+c.dataset.d)));renderReq();return}
+  const b=e.target.closest('button[data-ra]');if(!b)return;const act=b.dataset.ra;
+  if(act!=='approve'&&!twoTap(b,act==='reject'?'اضغطي مرة أخرى للرفض':'اضغطي مرة أخرى للتراجع'))return;b.disabled=true;
+  try{const r=await rpc('admin_request_action',{p_pin:PIN,p_id:+b.dataset.id,p_action:act,p_max:reqComp[b.dataset.id]||0});
+    if(r.ok){const q=(reqData.items||[]).find(x=>String(x.id)===b.dataset.id);
+      if(q){q.status=act==='approve'?'approved':act==='reject'?'rejected':'pending';if(act==='approve')q.max_comp=reqComp[b.dataset.id]||0}renderReq();
+      toast(act==='approve'?'قُبلت — أبلغيها من «مقبولة»':act==='reject'?'رُفض الطلب':'رجع الطلب للانتظار');load()}
+    else toast('تعذّر')}catch(err){toast('تعذّر الاتصال')}b.disabled=false};
+$('gOpen').onchange=async e=>{try{await rpc('admin_set_general_open',{p_pin:PIN,p_on:e.target.checked});toast(e.target.checked?'صار الرابط العام يستقبل طلبات':'أُوقف استقبال الطلبات');load()}catch(err){toast('تعذّر الاتصال')}};
+function renderInv(){const L=invData.invites||[];renderReq();
   $('iOnly').checked=!!invData.invite_only;
   $('iOnlyNote').textContent=invData.invite_only?'مفعّل: يؤكد الحضور فقط من فتحت رابطاً خاصاً أرسلتِه لها، أو من رقمها في «قائمة المدعوات بأرقامهن». غيرهن يظهر لهن أن الدعوة خاصة.':'غير مفعّل: أي شخص يفتح الرابط العام يقدر يأخذ بطاقة. فعّليه حتى لا تفتح الدعوة إلا لمن أرسلتِ له.';
   const n={all:L.length,unsent:0,waiting:0,yes:0,no:0};L.forEach(i=>n[invState(i)]++);
@@ -13220,12 +13274,13 @@ $('irows').onclick=async e=>{const a=e.target.closest('a[data-sent]');if(a){rpc(
     load()}catch(err){toast('تعذّر الاتصال')}};
 const INV_DEFAULT='حياكم الله 🌸\nيسعدنا دعوتكم لحضور مناسبة غمرة دانة\n📅 يوم السبت 18/06/1448هـ الموافق 28/11/2026م\n📍 موقع القاعة: '+MAPS+'\n\nلتأكيد الحضور أو الاعتذار واستلام بطاقة الدخول، افتحوا الرابط:\n'+GUEST_URL+'\n\nنرجو التأكيد مبكراً 🤍';
 function invText(){let t=$('invTxt').value.trim()||INV_DEFAULT;if(!t.includes(GUEST_URL))t+='\n'+GUEST_URL;return t}
-function invSync(){const h='https://wa.me/?text='+encodeURIComponent(invText());$('waInv').href=h;$('bulkWa').href=h}
+function invSync(){const h='https://wa.me/?text='+encodeURIComponent(invText());$('waInv').href=h;$('bulkWa').href=h;$('reqWa').href=h}
 $('invTxt').value=ls.get('inv_txt')||INV_DEFAULT;invSync();
 $('invTxt').oninput=()=>{ls.set('inv_txt',$('invTxt').value);invSync()};
 $('goInv').onclick=()=>{sView('inv');const d=document.querySelector('#v-inv details.more');if(d){d.open=true;setTimeout(()=>d.scrollIntoView({behavior:'smooth',block:'start'}),50)}};
 $('resetInv').onclick=()=>{$('invTxt').value=INV_DEFAULT;ls.del('inv_txt');invSync();toast('رجع النص الأصلي')};
 $('bulkCopy').onclick=()=>$('copyInv').onclick();
+$('reqCopy').onclick=()=>$('copyInv').onclick();
 $('copyInv').onclick=async()=>{const t=invText();try{await navigator.clipboard.writeText(t);toast('نُسخت الدعوة مع الرابط')}catch(e){$('invTxt').focus();$('invTxt').select();toast('انسخ النص المحدد')}};
 $('capBtn').onclick=async()=>{const n=parseInt($('capIn').value,10);if(!(n>0)){toast('اكتب رقماً صحيحاً');return}
   try{const r=await rpc('admin_action',{p_pin:PIN,p_action:'set_cap',p_no:n});

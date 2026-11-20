@@ -109,9 +109,10 @@ async function health(){const PIN=ls.get('dev_pin');$('nums').hidden=true;if(!PI
     row('g4',h.staff_pin_default?'warn':'ok','الرقم السري للموظفة',h.staff_pin_default?'ما زال الافتراضي 654321 — غيّريه من «المزيد»':'مُغيَّر عن الافتراضي');
     row('g4',h.bride_pin_set?'ok':'warn','الرقم السري للعروسة',h.bride_pin_set?'موجود':'غير مضبوط');
     row('g4',h.invite_only?'ok':'warn','الدعوة للمدعوين فقط',h.invite_only?'مفعّل':'غير مفعّل — أي شخص يفتح الرابط العام يقدر يأخذ بطاقة');
+    row('g4','ok','الدعوة الجماعية (الرابط العام)',!h.invite_only?'مفتوحة للجميع بدون موافقة':h.general_open?'تصل طلبات وتحتاج موافقة أم العروسة — بانتظار الموافقة: '+h.requests_pending:'لا تؤكد إلا الأرقام المسجّلة في القائمة');
     row('g4',h.overbooked?'bad':'ok','العدد',h.overbooked?'المؤكدون أكثر من العدد المسموح!':'المؤكدون '+h.persons+' من '+h.capacity);
     if(h.fail_count>=5)row('g4','warn','محاولات رقم سري خاطئة',h.fail_count+' محاولة خلال آخر 10 دقائق');
-    const N=[['persons','أشخاص مؤكدون'],['capacity','العدد المسموح'],['cards_taken','بطاقات مؤكدة'],['entered','دخلن'],['links_active','روابط خاصة فعّالة'],['links_used','روابط فُتحت'],['links_bride','من العروسة'],['list_invites','في قائمة الأرقام'],['declines','اعتذرن']];
+    const N=[['persons','أشخاص مؤكدون'],['capacity','العدد المسموح'],['cards_taken','بطاقات مؤكدة'],['entered','دخلن'],['links_active','روابط خاصة فعّالة'],['links_used','روابط فُتحت'],['links_bride','من العروسة'],['list_invites','في قائمة الأرقام'],['requests_pending','طلبات بانتظار الموافقة'],['declines','اعتذرن']];
     $('nums').innerHTML=N.map(([k,t])=>`<div class="st"><b>${h[k]}</b><span>${t}</span></div>`).join('');$('nums').hidden=false}
   catch(e){if(/bad_pin|not_admin|locked/.test(e.message)){ls.del('dev_pin');$('pinWrap').hidden=false;row('g4','warn','الرقم السري',/locked/.test(e.message)?'محاولات كثيرة، انتظر 10 دقائق':'الرقم غير صحيح أو تغيّر')}else row('g4','bad','قراءة الأرقام','تعذّر الاتصال')}}
 $('pinBtn').onclick=()=>{const p=$('pin').value.trim();if(!p)return;ls.set('dev_pin',p);$('pin').value='';run()};
